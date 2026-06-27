@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
     <title>Alexstyle - Turnos</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #F2F2F7; margin: 0; padding: 15px; }
@@ -11,24 +10,10 @@
         h3 { margin-top: 0; font-size: 1.1rem; color: #1c1c1e; }
         input, select { width: 100%; padding: 12px; border: 1px solid #E5E5EA; border-radius: 10px; margin-bottom: 10px; box-sizing: border-box; font-size: 16px; }
         button { width: 100%; background-color: #007AFF; color: white; border: none; padding: 14px; border-radius: 10px; font-weight: 600; font-size: 16px; }
-        
         .turno-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f2f2f7; }
-        .turno-row:last-child { border-bottom: none; }
-        .info-text { font-size: 0.95rem; }
-        .info-text strong { display: block; color: #000; font-size: 1rem; }
-        .btn-delete { background-color: #FF3B30; padding: 8px 12px; font-size: 0.85rem; width: auto; color: white; border-radius: 8px; border: none; }
-        
-        /* Estilo compacto para la recaudación */
-        .card-blue { 
-            background-color: #007AFF; 
-            color: white; 
-            padding: 12px 16px !important; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-        }
-        .card-blue h3 { margin: 0; font-size: 0.95rem; color: white; opacity: 0.9; }
-        .card-blue p { font-size: 1.25rem; font-weight: bold; margin: 0; }
+        .btn-delete { background-color: #FF3B30; padding: 8px 12px; font-size: 0.85rem; color: white; border-radius: 8px; border: none; }
+        .card-blue { background-color: #007AFF; color: white; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; }
+        .historial { color: #8e8e93; font-size: 0.85rem; }
     </style>
 </head>
 <body>
@@ -41,15 +26,17 @@
         <button onclick="guardarTurno()">Reservar</button>
     </div>
 
-    <!-- Sección de Recaudación Semanal Compacta -->
     <div class="card card-blue">
         <h3>Recaudación Semanal</h3>
-        <p id="total-recaudado">$0</p>
+        <p id="total-recaudado" style="font-size: 1.25rem; font-weight: bold; margin: 0;">$0</p>
     </div>
 
-    <div id="lista-turnos" class="card">
+    <div class="card">
         <h3>Próximos Turnos</h3>
-        <div id="contenedor-items"></div>
+        <div id="contenedor-proximos"></div>
+        <hr style="border: 0; border-top: 1px solid #f2f2f7; margin: 15px 0;">
+        <h3 style="font-size: 0.9rem; color: #8e8e93;">Historial</h3>
+        <div id="contenedor-historial"></div>
     </div>
 
     <script>
@@ -57,81 +44,75 @@
         const todosLosHorarios = ["10:20", "11:00", "11:40", "12:20", "13:00", "14:40", "15:20", "16:00", "16:40", "17:20", "18:00", "18:40", "19:20", "20:00", "20:40", "21:20"];
         let turnos = JSON.parse(localStorage.getItem('turnos_iphone')) || [];
 
-        function ordenarTurnos() {
+        function renderizar() {
             turnos.sort((a, b) => new Date(a.fecha + 'T' + a.hora) - new Date(b.fecha + 'T' + b.hora));
+            
+            const hoy = new Date();
+            hoy.setHours(0,0,0,0);
+            
+            const proximos = document.getElementById('contenedor-proximos');
+            const historial = document.getElementById('contenedor-historial');
+            
+            proximos.innerHTML = '';
+            historial.innerHTML = '';
+
+            turnos.forEach(t => {
+                const fechaTurno = new Date(t.fecha + 'T00:00:00');
+                const esPasado = fechaTurno < hoy;
+                
+                const html = `
+                    <div class="turno-row">
+                        <div class="info-text">
+                            <strong>${t.nombre}</strong>
+                            <span class="${esPasado ? 'historial' : ''}">${t.fecha} • ${t.hora} hs</span>
+                        </div>
+                        ${!esPasado ? `<button class="btn-delete" onclick="eliminarTurno(${t.id})">Anular</button>` : ''}
+                    </div>`;
+                
+                if (esPasado) historial.innerHTML += html;
+                else proximos.innerHTML += html;
+            });
+
+            if (proximos.innerHTML === '') proximos.innerHTML = '<p style="color:#8e8e93;">No hay turnos pendientes.</p>';
+            calcularRecaudacion();
         }
 
         function calcularRecaudacion() {
             const hoy = new Date();
             const haceUnaSemana = new Date();
             haceUnaSemana.setDate(hoy.getDate() - 7);
-
-            const turnosSemana = turnos.filter(t => {
-                const fechaTurno = new Date(t.fecha + 'T00:00:00');
-                return fechaTurno >= haceUnaSemana && fechaTurno <= hoy;
-            });
-
-            const total = turnosSemana.length * PRECIO_CORTE;
+            const total = turnos.filter(t => new Date(t.fecha) >= haceUnaSemana && new Date(t.fecha) <= hoy).length * PRECIO_CORTE;
             document.getElementById('total-recaudado').innerText = '$' + total.toLocaleString('es-AR');
-        }
-
-        function actualizarHorarios() {
-            const fechaSeleccionada = document.getElementById('fecha').value;
-            const selectHora = document.getElementById('hora');
-            const ocupados = turnos.filter(t => t.fecha === fechaSeleccionada).map(t => t.hora);
-            
-            selectHora.innerHTML = '<option value="">Selecciona hora libre</option>';
-            todosLosHorarios.forEach(h => {
-                if (!ocupados.includes(h)) {
-                    selectHora.innerHTML += `<option value="${h}">${h}</option>`;
-                }
-            });
         }
 
         function guardarTurno() {
             const nombre = document.getElementById('nombre').value;
             const fecha = document.getElementById('fecha').value;
             const hora = document.getElementById('hora').value;
-
-            if (!nombre || !fecha || !hora) return alert("Por favor, completa todos los campos");
-
+            if (!nombre || !fecha || !hora) return alert("Completa todos los campos");
             turnos.push({ id: Date.now(), nombre, fecha, hora });
-            ordenarTurnos();
             localStorage.setItem('turnos_iphone', JSON.stringify(turnos));
-            
             document.getElementById('nombre').value = '';
             actualizarHorarios();
-            renderizarTurnos();
-            calcularRecaudacion();
+            renderizar();
         }
 
         function eliminarTurno(id) {
             turnos = turnos.filter(t => t.id !== id);
             localStorage.setItem('turnos_iphone', JSON.stringify(turnos));
             actualizarHorarios();
-            renderizarTurnos();
-            calcularRecaudacion();
+            renderizar();
         }
 
-        function renderizarTurnos() {
-            ordenarTurnos();
-            const cont = document.getElementById('contenedor-items');
-            cont.innerHTML = turnos.length === 0 ? '<p style="color:#8e8e93; font-size:0.9rem;">No hay turnos agendados.</p>' : '';
-            
-            turnos.forEach(t => {
-                cont.innerHTML += `
-                    <div class="turno-row">
-                        <div class="info-text">
-                            <strong>${t.nombre}</strong>
-                            ${t.fecha} • ${t.hora} hs
-                        </div>
-                        <button class="btn-delete" onclick="eliminarTurno(${t.id})">Anular</button>
-                    </div>`;
-            });
+        function actualizarHorarios() {
+            const fecha = document.getElementById('fecha').value;
+            const select = document.getElementById('hora');
+            const ocupados = turnos.filter(t => t.fecha === fecha).map(t => t.hora);
+            select.innerHTML = '<option value="">Selecciona hora</option>';
+            todosLosHorarios.forEach(h => { if (!ocupados.includes(h)) select.innerHTML += `<option value="${h}">${h}</option>`; });
         }
 
-        renderizarTurnos();
-        calcularRecaudacion();
+        renderizar();
     </script>
 </body>
 </html>
