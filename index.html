@@ -104,10 +104,13 @@
         }
 
         function eliminarTurno(id) {
-            turnos = turnos.filter(t => t.id !== id);
-            localStorage.setItem('turnos_iphone', JSON.stringify(turnos));
-            actualizarHorarios();
-            renderizar();
+            const turnoAEliminar = turnos.find(t => t.id === id);
+            if (confirm(`¿Estás seguro de que quieres anular el turno de ${turnoAEliminar.nombre}?`)) {
+                turnos = turnos.filter(t => t.id !== id);
+                localStorage.setItem('turnos_iphone', JSON.stringify(turnos));
+                actualizarHorarios();
+                renderizar();
+            }
         }
 
         function actualizarHorarios() {
