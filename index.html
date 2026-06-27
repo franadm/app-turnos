@@ -54,4 +54,107 @@
 
     <script>
         const PRECIO_CORTE = 15000;
-        const todosLosHorarios = ["10:20", "11:00", "11:40", "12:20", "
+        const todosLosHorarios = ["10:20", "11:00", "11:40", "12:20", "13:00", "14:40", "15:20", "16:00", "16:40", "17:20", "18:00", "18:40", "19:20", "20:00", "20:40", "21:20"];
+        
+        let turnos = JSON.parse(localStorage.getItem('turnos_iphone')) || [];
+        let fiados = JSON.parse(localStorage.getItem('fiados_iphone')) || [];
+
+        function renderizar() {
+            turnos.sort((a, b) => new Date(a.fecha + 'T' + a.hora) - new Date(b.fecha + 'T' + b.hora));
+            const hoy = new Date(); hoy.setHours(0,0,0,0);
+            const fechaHoyString = new Date().toISOString().split('T')[0];
+            const proximos = document.getElementById('contenedor-proximos');
+            const historial = document.getElementById('contenedor-historial');
+            proximos.innerHTML = ''; historial.innerHTML = '';
+
+            turnos.forEach(t => {
+                const esPasado = new Date(t.fecha + 'T00:00:00') < hoy;
+                const html = `<div class="turno-row ${t.fecha === fechaHoyString ? 'turno-hoy' : ''}">
+                    <div><strong>${t.nombre}</strong><br><span class="${esPasado ? 'historial' : ''}">${t.fecha} • ${t.hora} hs</span></div>
+                    ${!esPasado ? `<button class="btn-delete" onclick="eliminarTurno(${t.id})">Anular</button>` : ''}
+                </div>`;
+                esPasado ? historial.innerHTML += html : proximos.innerHTML += html;
+            });
+
+            const contFiados = document.getElementById('contenedor-pendientes');
+            contFiados.innerHTML = '';
+            fiados.forEach(f => {
+                contFiados.innerHTML += `<div class="turno-row">
+                    <strong>${f.nombre}</strong>
+                    <div>
+                        <button class="btn-pay" onclick="pagarFiado(${f.id})">Pagado</button>
+                        <button class="btn-delete" onclick="eliminarFiado(${f.id})">Eliminar</button>
+                    </div>
+                </div>`;
+            });
+
+            calcularRecaudacion();
+        }
+
+        function agregarFiado() {
+            const nombre = document.getElementById('nombre-fiado').value;
+            if (!nombre) return alert("Ingresa un nombre");
+            fiados.push({ id: Date.now(), nombre });
+            localStorage.setItem('fiados_iphone', JSON.stringify(fiados));
+            document.getElementById('nombre-fiado').value = '';
+            renderizar();
+        }
+
+        function pagarFiado(id) {
+            const fiado = fiados.find(f => f.id === id);
+            if (confirm(`¿Confirmar que ${fiado.nombre} ya pagó?`)) {
+                fiados = fiados.filter(f => f.id !== id);
+                localStorage.setItem('fiados_iphone', JSON.stringify(fiados));
+                renderizar();
+            }
+        }
+
+        function eliminarFiado(id) {
+            const fiado = fiados.find(f => f.id === id);
+            if (confirm(`¿Estás seguro de eliminar el pendiente de ${fiado.nombre}?`)) {
+                fiados = fiados.filter(f => f.id !== id);
+                localStorage.setItem('fiados_iphone', JSON.stringify(fiados));
+                renderizar();
+            }
+        }
+
+        function guardarTurno() {
+            const nombre = document.getElementById('nombre').value;
+            const fecha = document.getElementById('fecha').value;
+            const hora = document.getElementById('hora').value;
+            if (!nombre || !fecha || !hora) return alert("Completa todos los campos");
+            turnos.push({ id: Date.now(), nombre, fecha, hora });
+            localStorage.setItem('turnos_iphone', JSON.stringify(turnos));
+            document.getElementById('nombre').value = '';
+            actualizarHorarios();
+            renderizar();
+        }
+
+        function eliminarTurno(id) {
+            const turnoAEliminar = turnos.find(t => t.id === id);
+            if (confirm(`¿Estás seguro de que quieres anular el turno de ${turnoAEliminar.nombre}?`)) {
+                turnos = turnos.filter(t => t.id !== id);
+                localStorage.setItem('turnos_iphone', JSON.stringify(turnos));
+                actualizarHorarios();
+                renderizar();
+            }
+        }
+
+        function actualizarHorarios() {
+            const fecha = document.getElementById('fecha').value;
+            const select = document.getElementById('hora');
+            const ocupados = turnos.filter(t => t.fecha === fecha).map(t => t.hora);
+            select.innerHTML = '<option value="">Selecciona hora</option>';
+            todosLosHorarios.forEach(h => { if (!ocupados.includes(h)) select.innerHTML += `<option value="${h}">${h}</option>`; });
+        }
+
+        function calcularRecaudacion() {
+            const haceUnaSemana = new Date(); haceUnaSemana.setDate(haceUnaSemana.getDate() - 7);
+            const total = turnos.filter(t => new Date(t.fecha + 'T00:00:00') >= haceUnaSemana).length * PRECIO_CORTE;
+            document.getElementById('total-recaudado').innerText = '$' + total.toLocaleString('es-AR');
+        }
+
+        renderizar();
+    </script>
+</body>
+</html>
