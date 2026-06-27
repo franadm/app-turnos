@@ -10,7 +10,11 @@
         h3 { margin-top: 0; font-size: 1.1rem; color: #1c1c1e; }
         input, select { width: 100%; padding: 12px; border: 1px solid #E5E5EA; border-radius: 10px; margin-bottom: 10px; box-sizing: border-box; font-size: 16px; }
         button { width: 100%; background-color: #007AFF; color: white; border: none; padding: 14px; border-radius: 10px; font-weight: 600; font-size: 16px; }
-        .turno-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f2f2f7; }
+        
+        .turno-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #f2f2f7; border-radius: 8px; }
+        /* Distintivo para HOY */
+        .turno-hoy { border-left: 5px solid #007AFF; background-color: #F0F7FF; }
+        
         .btn-delete { background-color: #FF3B30; padding: 8px 12px; font-size: 0.85rem; color: white; border-radius: 8px; border: none; }
         .card-blue { background-color: #007AFF; color: white; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; }
         .historial { color: #8e8e93; font-size: 0.85rem; }
@@ -49,6 +53,7 @@
             
             const hoy = new Date();
             hoy.setHours(0,0,0,0);
+            const fechaHoyString = new Date().toISOString().split('T')[0];
             
             const proximos = document.getElementById('contenedor-proximos');
             const historial = document.getElementById('contenedor-historial');
@@ -59,12 +64,13 @@
             turnos.forEach(t => {
                 const fechaTurno = new Date(t.fecha + 'T00:00:00');
                 const esPasado = fechaTurno < hoy;
+                const esHoy = t.fecha === fechaHoyString;
                 
                 const html = `
-                    <div class="turno-row">
+                    <div class="turno-row ${esHoy ? 'turno-hoy' : ''}">
                         <div class="info-text">
                             <strong>${t.nombre}</strong>
-                            <span class="${esPasado ? 'historial' : ''}">${t.fecha} • ${t.hora} hs</span>
+                            <span class="${esPasado ? 'historial' : ''}">${t.fecha} • ${t.hora} hs ${esHoy ? '<b>(HOY)</b>' : ''}</span>
                         </div>
                         ${!esPasado ? `<button class="btn-delete" onclick="eliminarTurno(${t.id})">Anular</button>` : ''}
                     </div>`;
@@ -81,7 +87,7 @@
             const hoy = new Date();
             const haceUnaSemana = new Date();
             haceUnaSemana.setDate(hoy.getDate() - 7);
-            const total = turnos.filter(t => new Date(t.fecha) >= haceUnaSemana && new Date(t.fecha) <= hoy).length * PRECIO_CORTE;
+            const total = turnos.filter(t => new Date(t.fecha + 'T00:00:00') >= haceUnaSemana && new Date(t.fecha + 'T00:00:00') <= hoy).length * PRECIO_CORTE;
             document.getElementById('total-recaudado').innerText = '$' + total.toLocaleString('es-AR');
         }
 
