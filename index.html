@@ -12,12 +12,11 @@
         input, select { width: 100%; padding: 12px; border: 1px solid #E5E5EA; border-radius: 10px; margin-bottom: 10px; box-sizing: border-box; font-size: 16px; }
         button { width: 100%; background-color: #007AFF; color: white; border: none; padding: 14px; border-radius: 10px; font-weight: 600; font-size: 16px; }
         
-        /* Lista ordenada */
         .turno-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f2f2f7; }
         .turno-row:last-child { border-bottom: none; }
         .info-text { font-size: 0.95rem; }
         .info-text strong { display: block; color: #000; font-size: 1rem; }
-        .btn-delete { background-color: #FF3B30; padding: 8px 12px; font-size: 0.85rem; width: auto; }
+        .btn-delete { background-color: #FF3B30; padding: 8px 12px; font-size: 0.85rem; width: auto; color: white; border-radius: 8px; border: none; }
     </style>
 </head>
 <body>
@@ -38,6 +37,13 @@
     <script>
         const todosLosHorarios = ["10:20", "11:00", "11:40", "12:20", "14:40", "15:20", "16:00", "16:40", "17:20", "18:00", "18:40", "19:20", "20:00", "20:40", "21:20"];
         let turnos = JSON.parse(localStorage.getItem('turnos_iphone')) || [];
+
+        // Función para ordenar turnos: Fecha + Hora
+        function ordenarTurnos() {
+            turnos.sort((a, b) => {
+                return new Date(a.fecha + 'T' + a.hora) - new Date(b.fecha + 'T' + b.hora);
+            });
+        }
 
         function actualizarHorarios() {
             const fechaSeleccionada = document.getElementById('fecha').value;
@@ -60,6 +66,7 @@
             if (!nombre || !fecha || !hora) return alert("Por favor, completa todos los campos");
 
             turnos.push({ id: Date.now(), nombre, fecha, hora });
+            ordenarTurnos(); // Ordenar antes de guardar
             localStorage.setItem('turnos_iphone', JSON.stringify(turnos));
             
             document.getElementById('nombre').value = '';
@@ -75,6 +82,7 @@
         }
 
         function renderizarTurnos() {
+            ordenarTurnos(); // Ordenar antes de mostrar
             const cont = document.getElementById('contenedor-items');
             cont.innerHTML = turnos.length === 0 ? '<p style="color:#8e8e93; font-size:0.9rem;">No hay turnos agendados.</p>' : '';
             
