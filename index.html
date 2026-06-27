@@ -6,22 +6,34 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <title>Alexstyle - Turnos</title>
     <style>
-        body { font-family: -apple-system, sans-serif; background-color: #F2F2F7; margin: 0; padding: 20px; }
-        .card { background-color: #FFF; border-radius: 12px; padding: 16px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        input, select { width: 100%; padding: 12px; border: 1px solid #E5E5EA; border-radius: 8px; margin-bottom: 10px; box-sizing: border-box; }
-        button { width: 100%; background-color: #007AFF; color: white; border: none; padding: 16px; border-radius: 12px; font-weight: bold; }
-        .btn-delete { background-color: #FF3B30; padding: 8px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #F2F2F7; margin: 0; padding: 15px; }
+        .card { background-color: #FFF; border-radius: 12px; padding: 16px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        h3 { margin-top: 0; font-size: 1.1rem; color: #1c1c1e; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #E5E5EA; border-radius: 10px; margin-bottom: 10px; box-sizing: border-box; font-size: 16px; }
+        button { width: 100%; background-color: #007AFF; color: white; border: none; padding: 14px; border-radius: 10px; font-weight: 600; font-size: 16px; }
+        
+        /* Lista ordenada */
+        .turno-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f2f2f7; }
+        .turno-row:last-child { border-bottom: none; }
+        .info-text { font-size: 0.95rem; }
+        .info-text strong { display: block; color: #000; font-size: 1rem; }
+        .btn-delete { background-color: #FF3B30; padding: 8px 12px; font-size: 0.85rem; width: auto; }
     </style>
 </head>
 <body>
+
     <div class="card">
         <h3>Nuevo Turno</h3>
         <input type="text" id="nombre" placeholder="Nombre del cliente">
         <input type="date" id="fecha" onchange="actualizarHorarios()">
-        <select id="hora"></select>
+        <select id="hora"><option>Selecciona fecha primero</option></select>
         <button onclick="guardarTurno()">Reservar</button>
     </div>
-    <div id="lista-turnos"></div>
+
+    <div id="lista-turnos" class="card">
+        <h3>Próximos Turnos</h3>
+        <div id="contenedor-items"></div>
+    </div>
 
     <script>
         const todosLosHorarios = ["10:20", "11:00", "11:40", "12:20", "14:40", "15:20", "16:00", "16:40", "17:20", "18:00", "18:40", "19:20", "20:00", "20:40", "21:20"];
@@ -45,10 +57,11 @@
             const fecha = document.getElementById('fecha').value;
             const hora = document.getElementById('hora').value;
 
-            if (!nombre || !fecha || !hora) return alert("Completa todo");
+            if (!nombre || !fecha || !hora) return alert("Por favor, completa todos los campos");
 
             turnos.push({ id: Date.now(), nombre, fecha, hora });
             localStorage.setItem('turnos_iphone', JSON.stringify(turnos));
+            
             document.getElementById('nombre').value = '';
             actualizarHorarios();
             renderizarTurnos();
@@ -62,19 +75,22 @@
         }
 
         function renderizarTurnos() {
-            const cont = document.getElementById('lista-turnos');
-            cont.innerHTML = '<h3>Próximos</h3>';
+            const cont = document.getElementById('contenedor-items');
+            cont.innerHTML = turnos.length === 0 ? '<p style="color:#8e8e93; font-size:0.9rem;">No hay turnos agendados.</p>' : '';
+            
             turnos.forEach(t => {
                 cont.innerHTML += `
-                    <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
-                        <div>${t.nombre} - ${t.fecha} ${t.hora}</div>
+                    <div class="turno-row">
+                        <div class="info-text">
+                            <strong>${t.nombre}</strong>
+                            ${t.fecha} • ${t.hora} hs
+                        </div>
                         <button class="btn-delete" onclick="eliminarTurno(${t.id})">Anular</button>
                     </div>`;
             });
         }
 
         renderizarTurnos();
-        actualizarHorarios();
     </script>
 </body>
 </html>
