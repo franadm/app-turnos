@@ -17,6 +17,9 @@
         .info-text { font-size: 0.95rem; }
         .info-text strong { display: block; color: #000; font-size: 1rem; }
         .btn-delete { background-color: #FF3B30; padding: 8px 12px; font-size: 0.85rem; width: auto; color: white; border-radius: 8px; border: none; }
+        
+        /* Estilo para la tarjeta de recaudación */
+        .card-blue { background-color: #007AFF; color: white; text-align: center; }
     </style>
 </head>
 <body>
@@ -29,20 +32,38 @@
         <button onclick="guardarTurno()">Reservar</button>
     </div>
 
+    <!-- Sección de Recaudación Semanal -->
+    <div class="card card-blue">
+        <h3 style="color: white; margin-bottom: 5px;">Recaudación Semanal</h3>
+        <p id="total-recaudado" style="font-size: 1.8rem; font-weight: bold; margin: 0;">$0</p>
+    </div>
+
     <div id="lista-turnos" class="card">
         <h3>Próximos Turnos</h3>
         <div id="contenedor-items"></div>
     </div>
 
     <script>
+        const PRECIO_CORTE = 15000;
         const todosLosHorarios = ["10:20", "11:00", "11:40", "12:20", "13:00", "14:40", "15:20", "16:00", "16:40", "17:20", "18:00", "18:40", "19:20", "20:00", "20:40", "21:20"];
         let turnos = JSON.parse(localStorage.getItem('turnos_iphone')) || [];
 
-        // Función para ordenar turnos: Fecha + Hora
         function ordenarTurnos() {
-            turnos.sort((a, b) => {
-                return new Date(a.fecha + 'T' + a.hora) - new Date(b.fecha + 'T' + b.hora);
+            turnos.sort((a, b) => new Date(a.fecha + 'T' + a.hora) - new Date(b.fecha + 'T' + b.hora));
+        }
+
+        function calcularRecaudacion() {
+            const hoy = new Date();
+            const haceUnaSemana = new Date();
+            haceUnaSemana.setDate(hoy.getDate() - 7);
+
+            const turnosSemana = turnos.filter(t => {
+                const fechaTurno = new Date(t.fecha + 'T00:00:00');
+                return fechaTurno >= haceUnaSemana && fechaTurno <= hoy;
             });
+
+            const total = turnosSemana.length * PRECIO_CORTE;
+            document.getElementById('total-recaudado').innerText = '$' + total.toLocaleString('es-AR');
         }
 
         function actualizarHorarios() {
@@ -66,12 +87,13 @@
             if (!nombre || !fecha || !hora) return alert("Por favor, completa todos los campos");
 
             turnos.push({ id: Date.now(), nombre, fecha, hora });
-            ordenarTurnos(); // Ordenar antes de guardar
+            ordenarTurnos();
             localStorage.setItem('turnos_iphone', JSON.stringify(turnos));
             
             document.getElementById('nombre').value = '';
             actualizarHorarios();
             renderizarTurnos();
+            calcularRecaudacion(); // Actualizar total
         }
 
         function eliminarTurno(id) {
@@ -79,10 +101,11 @@
             localStorage.setItem('turnos_iphone', JSON.stringify(turnos));
             actualizarHorarios();
             renderizarTurnos();
+            calcularRecaudacion(); // Actualizar total
         }
 
         function renderizarTurnos() {
-            ordenarTurnos(); // Ordenar antes de mostrar
+            ordenarTurnos();
             const cont = document.getElementById('contenedor-items');
             cont.innerHTML = turnos.length === 0 ? '<p style="color:#8e8e93; font-size:0.9rem;">No hay turnos agendados.</p>' : '';
             
@@ -98,7 +121,9 @@
             });
         }
 
+        // Ejecutar al iniciar
         renderizarTurnos();
+        calcularRecaudacion();
     </script>
 </body>
 </html>
