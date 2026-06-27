@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <!-- Etiquetas cruciales para Safari en iPhone -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Turnos">
+    
+    <title>Sistema de Turnos</title>
+    
+    <style>
+        /* Diseño estilo iOS (Apple Human Interface Guidelines) */
+        :root {
+            --ios-blue: #007AFF;
+            --ios-bg: #F2F2F7;
+            --ios-card: #FFFFFF;
+            --ios-text: #000000;
+            --ios-gray: #8E8E93;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--ios-bg);
+            color: var(--ios-text);
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        header {
+            background-color: var(--ios-card);
+            padding: 20px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+        }
+
+        .container {
+            padding: 20px;
+        }
+
+        .card {
+            background-color: var(--ios-card);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        label {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--ios-gray);
+            margin-bottom: 6px;
+            margin-top: 12px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #E5E5EA;
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            background-color: var(--ios-bg);
+            -webkit-appearance: none; /* Quita el estilo por defecto de Safari */
+        }
+
+        button {
+            width: 100%;
+            background-color: var(--ios-blue);
+            color: white;
+            border: none;
+            padding: 16px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            margin-top: 20px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        button:active {
+            opacity: 0.7;
+        }
+
+        .turno-item {
+            border-bottom: 1px solid #E5E5EA;
+            padding: 12px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .turno-item:last-child {
+            border-bottom: none;
+        }
+
+        .turno-info h4 {
+            margin: 0 0 4px 0;
+            font-size: 1rem;
+        }
+
+        .turno-info p {
+            margin: 0;
+            color: var(--ios-gray);
+            font-size: 0.85rem;
+        }
+
+        .btn-delete {
+            background-color: #FF3B30;
+            width: auto;
+            padding: 8px 12px;
+            margin: 0;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        Mis Turnos
+    </header>
+
+    <div class="container">
+        <!-- Formulario para Nuevo Turno -->
+        <div class="card">
+            <h3 style="margin-top: 0;">Nuevo Turno</h3>
+            
+            <label for="nombre">Nombre del cliente</label>
+            <input type="text" id="nombre" placeholder="Ej: Juan Pérez">
+            
+            <label for="fecha">Fecha</label>
+            <input type="date" id="fecha">
+            
+            <label for="hora">Hora</label>
+            <input type="time" id="hora">
+            
+            <button onclick="guardarTurno()">Reservar Turno</button>
+        </div>
+
+        <!-- Lista de Turnos Agendados -->
+        <h3 style="margin-left: 8px; color: var(--ios-gray); font-size: 0.9rem; text-transform: uppercase;">Próximos Turnos</h3>
+        <div class="card" id="lista-turnos">
+            <!-- Los turnos aparecerán aquí -->
+        </div>
+    </div>
+
+    <script>
+        // Array para almacenar los turnos
+        let turnos = JSON.parse(localStorage.getItem('turnos_iphone')) || [];
+
+        // Función para guardar un turno nuevo
+        function guardarTurno() {
+            const nombre = document.getElementById('nombre').value;
+            const fecha = document.getElementById('fecha').value;
+            const hora = document.getElementById('hora').value;
+
+            if (!nombre || !fecha || !hora) {
+                alert("Por favor, completa todos los campos.");
+                return;
+            }
+
+            const nuevoTurno = {
+                id: Date.now(),
+                nombre: nombre,
+                fecha: fecha,
+                hora: hora
+            };
+
+            turnos.push(nuevoTurno);
+            
+            // Ordenar por fecha y hora
+            turnos.sort((a, b) => new Date(a.fecha + 'T' + a.hora) - new Date(b.fecha + 'T' + b.hora));
+            
+            // Guardar en el almacenamiento local del navegador
+            localStorage.setItem('turnos_iphone', JSON.stringify(turnos));
+
+            // Limpiar formulario y actualizar vista
+            document.getElementById('nombre').value = '';
+            document.getElementById('fecha').value = '';
+            document.getElementById('hora').value = '';
+            renderizarTurnos();
+        }
+
+        // Función para eliminar un turno
+        function eliminarTurno(id) {
+            turnos = turnos.filter(turno => turno.id !== id);
+            localStorage.setItem('turnos_iphone', JSON.stringify(turnos));
+            renderizarTurnos();
+        }
+
+        // Función para dibujar la lista en pantalla
+        function renderizarTurnos() {
+            const contenedor = document.getElementById('lista-turnos');
+            contenedor.innerHTML = '';
+
+            if (turnos.length === 0) {
+                contenedor.innerHTML = '<p style="text-align: center; color: #8E8E93;">No hay turnos agendados.</p>';
+                return;
+            }
+
+            turnos.forEach(turno => {
+                // Formatear fecha para que se vea más amigable
+                const fechaFormat = new Date(turno.fecha + 'T00:00:00').toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
+
+                const item = document.createElement('div');
+                item.className = 'turno-item';
+                item.innerHTML = `
+                    <div class="turno-info">
+                        <h4>${turno.nombre}</h4>
+                        <p>${fechaFormat} - ${turno.hora} hs</p>
+                    </div>
+                    <button class="btn-delete" onclick="eliminarTurno(${turno.id})">Anular</button>
+                `;
+                contenedor.appendChild(item);
+            });
+        }
+
+        // Cargar los turnos al iniciar la página
+        renderizarTurnos();
+    </script>
+</body>
+</html>
