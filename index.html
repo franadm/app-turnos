@@ -10,146 +10,79 @@
     <title>Sistema de Turnos Alexstyle</title>
     
     <style>
-        :root {
-            --ios-blue: #007AFF;
-            --ios-bg: #F2F2F7;
-            --ios-card: #FFFFFF;
-            --ios-text: #000000;
-            --ios-gray: #8E8E93;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--ios-bg);
-            color: var(--ios-text);
-            margin: 0;
-            padding: 0;
-        }
-
-        header {
-            background-color: var(--ios-card);
-            padding: 20px;
-            text-align: center;
-            font-size: 1.2rem;
-            font-weight: 600;
-            border-bottom: 1px solid rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-        }
-
-        .container { padding: 20px; }
-
-        .card {
-            background-color: var(--ios-card);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-
-        label {
-            display: block;
-            font-size: 0.9rem;
-            color: var(--ios-gray);
-            margin-bottom: 6px;
-            margin-top: 12px;
-        }
-
-        input, select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #E5E5EA;
-            border-radius: 8px;
-            font-size: 1rem;
-            box-sizing: border-box;
-            background-color: var(--ios-bg);
-            -webkit-appearance: none;
-        }
-
-        button {
-            width: 100%;
-            background-color: var(--ios-blue);
-            color: white;
-            border: none;
-            padding: 16px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            border-radius: 12px;
-            margin-top: 20px;
-        }
-
-        .turno-item {
-            border-bottom: 1px solid #E5E5EA;
-            padding: 12px 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
+        :root { --ios-blue: #007AFF; --ios-bg: #F2F2F7; --ios-card: #FFFFFF; --ios-text: #000000; --ios-gray: #8E8E93; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--ios-bg); margin: 0; padding: 20px; }
+        .card { background-color: var(--ios-card); border-radius: 12px; padding: 16px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        label { display: block; font-size: 0.9rem; color: var(--ios-gray); margin: 12px 0 6px 0; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #E5E5EA; border-radius: 8px; font-size: 1rem; background-color: var(--ios-bg); box-sizing: border-box; -webkit-appearance: none; }
+        button { width: 100%; background-color: var(--ios-blue); color: white; border: none; padding: 16px; font-size: 1.1rem; font-weight: 600; border-radius: 12px; margin-top: 20px; }
+        .turno-item { border-bottom: 1px solid #E5E5EA; padding: 12px 0; display: flex; justify-content: space-between; align-items: center; }
         .btn-delete { background-color: #FF3B30; color: white; border: none; padding: 8px 12px; border-radius: 8px; }
     </style>
 </head>
 <body>
 
-    <header>Alexstyle - Turnos</header>
+    <header style="text-align: center; font-weight: 600; font-size: 1.2rem; margin-bottom: 20px;">Alexstyle - Gestión</header>
 
-    <div class="container">
-        <div class="card">
-            <h3>Nuevo Turno</h3>
-            <label for="nombre">Nombre del cliente</label>
-            <input type="text" id="nombre" placeholder="Ej: Juan Pérez">
-            
-            <label for="fecha">Fecha</label>
-            <input type="date" id="fecha">
-            
-            <label for="hora">Hora del turno</label>
-            <select id="hora">
-                <option value="">Selecciona una hora</option>
-            </select>
-            
-            <button onclick="guardarTurno()">Reservar Turno</button>
-        </div>
-
-        <h3 style="color: var(--ios-gray); font-size: 0.9rem; text-transform: uppercase;">Próximos Turnos</h3>
-        <div class="card" id="lista-turnos"></div>
+    <div class="card">
+        <h3>Nuevo Turno</h3>
+        <label for="nombre">Nombre del cliente</label>
+        <input type="text" id="nombre" placeholder="Ej: Juan Pérez">
+        
+        <label for="fecha">Fecha</label>
+        <input type="date" id="fecha" onchange="actualizarHorarios()">
+        
+        <label for="hora">Hora disponible</label>
+        <select id="hora"></select>
+        
+        <button onclick="guardarTurno()">Reservar Turno</button>
     </div>
 
+    <h3 style="color: var(--ios-gray); font-size: 0.9rem; text-transform: uppercase;">Próximos Turnos</h3>
+    <div class="card" id="lista-turnos"></div>
+
     <script>
-        // Lógica de horarios configurada para Alexstyle
-        const selectHora = document.getElementById('hora');
-        const horarios = [
-            "10:20", "11:00", "11:40", "12:20", 
-            "14:40", "15:20", "16:00", "16:40", "17:20", "18:00", "18:40", "19:20", "20:00", "20:40", "21:20"
-        ];
-
-        horarios.forEach(h => {
-            let opt = document.createElement('option');
-            opt.value = h;
-            opt.textContent = h;
-            selectHora.appendChild(opt);
-        });
-
+        const todosLosHorarios = ["10:20", "11:00", "11:40", "12:20", "14:40", "15:20", "16:00", "16:40", "17:20", "18:00", "18:40", "19:20", "20:00", "20:40", "21:20"];
         let turnos = JSON.parse(localStorage.getItem('turnos_iphone')) || [];
+
+        function actualizarHorarios() {
+            const fechaSeleccionada = document.getElementById('fecha').value;
+            const selectHora = document.getElementById('hora');
+            selectHora.innerHTML = '<option value="">Selecciona una hora</option>';
+            
+            // Filtramos los turnos ya ocupados para esa fecha
+            const ocupados = turnos.filter(t => t.fecha === fechaSeleccionada).map(t => t.hora);
+            
+            todosLosHorarios.forEach(h => {
+                if (!ocupados.includes(h)) {
+                    let opt = document.createElement('option');
+                    opt.value = h;
+                    opt.textContent = h;
+                    selectHora.appendChild(opt);
+                }
+            });
+        }
 
         function guardarTurno() {
             const nombre = document.getElementById('nombre').value;
             const fecha = document.getElementById('fecha').value;
             const hora = document.getElementById('hora').value;
 
-            if (!nombre || !fecha || !hora) {
-                alert("Completa todos los campos");
-                return;
-            }
+            if (!nombre || !fecha || !hora) return alert("Completa todos los campos");
 
             turnos.push({ id: Date.now(), nombre, fecha, hora });
             turnos.sort((a, b) => new Date(a.fecha + 'T' + a.hora) - new Date(b.fecha + 'T' + b.hora));
             localStorage.setItem('turnos_iphone', JSON.stringify(turnos));
+            
+            document.getElementById('nombre').value = '';
+            actualizarHorarios();
             renderizarTurnos();
         }
 
         function eliminarTurno(id) {
             turnos = turnos.filter(t => t.id !== id);
             localStorage.setItem('turnos_iphone', JSON.stringify(turnos));
+            actualizarHorarios();
             renderizarTurnos();
         }
 
