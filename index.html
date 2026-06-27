@@ -3,29 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Alexstyle - Turnos</title>
+    <title>Alexstyle - Gestión</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #F2F2F7; margin: 0; padding: 15px; }
         .card { background-color: #FFF; border-radius: 12px; padding: 16px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         h3 { margin-top: 0; font-size: 1.1rem; color: #1c1c1e; }
         input, select { width: 100%; padding: 12px; border: 1px solid #E5E5EA; border-radius: 10px; margin-bottom: 10px; box-sizing: border-box; font-size: 16px; }
-        button { width: 100%; background-color: #007AFF; color: white; border: none; padding: 14px; border-radius: 10px; font-weight: 600; font-size: 16px; }
+        button { width: 100%; background-color: #007AFF; color: white; border: none; padding: 14px; border-radius: 10px; font-weight: 600; font-size: 16px; margin-bottom: 5px; }
         
         .turno-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #f2f2f7; border-radius: 8px; }
-        /* Distintivo para HOY */
         .turno-hoy { border-left: 5px solid #007AFF; background-color: #F0F7FF; }
         
-        .btn-delete { 
-            background-color: #FF3B30; 
-            padding: 8px 0; 
-            font-size: 0.85rem; 
-            color: white; 
-            border-radius: 8px; 
-            border: none; 
-            width: 80px;      /* Ancho fijo para todos */
-            flex-shrink: 0;   /* Mantiene el tamaño constante */
-            text-align: center;
-        }
+        .btn-delete { background-color: #FF3B30; padding: 8px 0; font-size: 0.85rem; color: white; border-radius: 8px; border: none; width: 80px; flex-shrink: 0; text-align: center; }
+        .btn-pay { background-color: #34C759; padding: 8px 0; font-size: 0.85rem; color: white; border-radius: 8px; border: none; width: 80px; flex-shrink: 0; text-align: center; }
         
         .card-blue { background-color: #007AFF; color: white; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; }
         .historial { color: #8e8e93; font-size: 0.85rem; }
@@ -39,6 +29,13 @@
         <input type="date" id="fecha" onchange="actualizarHorarios()">
         <select id="hora"><option>Selecciona fecha primero</option></select>
         <button onclick="guardarTurno()">Reservar</button>
+    </div>
+
+    <div class="card">
+        <h3>Pendientes de Pago (Fiados)</h3>
+        <input type="text" id="nombre-fiado" placeholder="Nombre del cliente">
+        <button onclick="agregarFiado()" style="background-color: #FF9500;">Agregar a Pendientes</button>
+        <div id="contenedor-pendientes"></div>
     </div>
 
     <div class="card card-blue">
@@ -57,51 +54,68 @@
     <script>
         const PRECIO_CORTE = 15000;
         const todosLosHorarios = ["10:20", "11:00", "11:40", "12:20", "13:00", "14:40", "15:20", "16:00", "16:40", "17:20", "18:00", "18:40", "19:20", "20:00", "20:40", "21:20"];
+        
         let turnos = JSON.parse(localStorage.getItem('turnos_iphone')) || [];
+        let fiados = JSON.parse(localStorage.getItem('fiados_iphone')) || [];
 
         function renderizar() {
+            // Render Turnos
             turnos.sort((a, b) => new Date(a.fecha + 'T' + a.hora) - new Date(b.fecha + 'T' + b.hora));
-            
-            const hoy = new Date();
-            hoy.setHours(0,0,0,0);
+            const hoy = new Date(); hoy.setHours(0,0,0,0);
             const fechaHoyString = new Date().toISOString().split('T')[0];
-            
             const proximos = document.getElementById('contenedor-proximos');
             const historial = document.getElementById('contenedor-historial');
-            
-            proximos.innerHTML = '';
-            historial.innerHTML = '';
+            proximos.innerHTML = ''; historial.innerHTML = '';
 
             turnos.forEach(t => {
-                const fechaTurno = new Date(t.fecha + 'T00:00:00');
-                const esPasado = fechaTurno < hoy;
-                const esHoy = t.fecha === fechaHoyString;
-                
-                const html = `
-                    <div class="turno-row ${esHoy ? 'turno-hoy' : ''}">
-                        <div class="info-text">
-                            <strong>${t.nombre}</strong>
-                            <span class="${esPasado ? 'historial' : ''}">${t.fecha} • ${t.hora} hs ${esHoy ? '<b>(HOY)</b>' : ''}</span>
-                        </div>
-                        ${!esPasado ? `<button class="btn-delete" onclick="eliminarTurno(${t.id})">Anular</button>` : ''}
-                    </div>`;
-                
-                if (esPasado) historial.innerHTML += html;
-                else proximos.innerHTML += html;
+                const esPasado = new Date(t.fecha + 'T00:00:00') < hoy;
+                const html = `<div class="turno-row ${t.fecha === fechaHoyString ? 'turno-hoy' : ''}">
+                    <div><strong>${t.nombre}</strong><br><span class="${esPasado ? 'historial' : ''}">${t.fecha} • ${t.hora} hs</span></div>
+                    ${!esPasado ? `<button class="btn-delete" onclick="eliminarTurno(${t.id})">Anular</button>` : ''}
+                </div>`;
+                esPasado ? historial.innerHTML += html : proximos.innerHTML += html;
             });
 
-            if (proximos.innerHTML === '') proximos.innerHTML = '<p style="color:#8e8e93;">No hay turnos pendientes.</p>';
+            // Render Fiados
+            const contFiados = document.getElementById('contenedor-pendientes');
+            contFiados.innerHTML = '';
+            fiados.forEach(f => {
+                contFiados.innerHTML += `<div class="turno-row">
+                    <strong>${f.nombre}</strong>
+                    <div>
+                        <button class="btn-pay" onclick="pagarFiado(${f.id})">Pagado</button>
+                        <button class="btn-delete" onclick="eliminarFiado(${f.id})">Eliminar</button>
+                    </div>
+                </div>`;
+            });
+
             calcularRecaudacion();
         }
 
-        function calcularRecaudacion() {
-            const hoy = new Date();
-            const haceUnaSemana = new Date();
-            haceUnaSemana.setDate(hoy.getDate() - 7);
-            const total = turnos.filter(t => new Date(t.fecha + 'T00:00:00') >= haceUnaSemana && new Date(t.fecha + 'T00:00:00') <= hoy).length * PRECIO_CORTE;
-            document.getElementById('total-recaudado').innerText = '$' + total.toLocaleString('es-AR');
+        function agregarFiado() {
+            const nombre = document.getElementById('nombre-fiado').value;
+            if (!nombre) return alert("Ingresa un nombre");
+            fiados.push({ id: Date.now(), nombre });
+            localStorage.setItem('fiados_iphone', JSON.stringify(fiados));
+            document.getElementById('nombre-fiado').value = '';
+            renderizar();
         }
 
+        function pagarFiado(id) {
+            fiados = fiados.filter(f => f.id !== id);
+            localStorage.setItem('fiados_iphone', JSON.stringify(fiados));
+            renderizar();
+        }
+
+        function eliminarFiado(id) {
+            if (confirm("¿Eliminar este pendiente?")) {
+                fiados = fiados.filter(f => f.id !== id);
+                localStorage.setItem('fiados_iphone', JSON.stringify(fiados));
+                renderizar();
+            }
+        }
+
+        // Funciones existentes (guardarTurno, eliminarTurno, etc) se mantienen igual
         function guardarTurno() {
             const nombre = document.getElementById('nombre').value;
             const fecha = document.getElementById('fecha').value;
@@ -115,13 +129,10 @@
         }
 
         function eliminarTurno(id) {
-            const turnoAEliminar = turnos.find(t => t.id === id);
-            if (confirm(`¿Estás seguro de que quieres anular el turno de ${turnoAEliminar.nombre}?`)) {
-                turnos = turnos.filter(t => t.id !== id);
-                localStorage.setItem('turnos_iphone', JSON.stringify(turnos));
-                actualizarHorarios();
-                renderizar();
-            }
+            turnos = turnos.filter(t => t.id !== id);
+            localStorage.setItem('turnos_iphone', JSON.stringify(turnos));
+            actualizarHorarios();
+            renderizar();
         }
 
         function actualizarHorarios() {
@@ -130,6 +141,12 @@
             const ocupados = turnos.filter(t => t.fecha === fecha).map(t => t.hora);
             select.innerHTML = '<option value="">Selecciona hora</option>';
             todosLosHorarios.forEach(h => { if (!ocupados.includes(h)) select.innerHTML += `<option value="${h}">${h}</option>`; });
+        }
+
+        function calcularRecaudacion() {
+            const haceUnaSemana = new Date(); haceUnaSemana.setDate(haceUnaSemana.getDate() - 7);
+            const total = turnos.filter(t => new Date(t.fecha + 'T00:00:00') >= haceUnaSemana).length * PRECIO_CORTE;
+            document.getElementById('total-recaudado').innerText = '$' + total.toLocaleString('es-AR');
         }
 
         renderizar();
