@@ -15,7 +15,18 @@
         /* Distintivo para HOY */
         .turno-hoy { border-left: 5px solid #007AFF; background-color: #F0F7FF; }
         
-        .btn-delete { background-color: #FF3B30; padding: 8px 12px; font-size: 0.85rem; color: white; border-radius: 8px; border: none; }
+        .btn-delete { 
+            background-color: #FF3B30; 
+            padding: 8px 0; 
+            font-size: 0.85rem; 
+            color: white; 
+            border-radius: 8px; 
+            border: none; 
+            width: 80px;      /* Ancho fijo para todos */
+            flex-shrink: 0;   /* Mantiene el tamaño constante */
+            text-align: center;
+        }
+        
         .card-blue { background-color: #007AFF; color: white; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; }
         .historial { color: #8e8e93; font-size: 0.85rem; }
     </style>
