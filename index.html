@@ -4,42 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Turnos">
-    
-    <title>Sistema de Turnos Alexstyle</title>
-    
+    <title>Alexstyle - Turnos</title>
     <style>
-        :root { --ios-blue: #007AFF; --ios-bg: #F2F2F7; --ios-card: #FFFFFF; --ios-text: #000000; --ios-gray: #8E8E93; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--ios-bg); margin: 0; padding: 20px; }
-        .card { background-color: var(--ios-card); border-radius: 12px; padding: 16px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        label { display: block; font-size: 0.9rem; color: var(--ios-gray); margin: 12px 0 6px 0; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #E5E5EA; border-radius: 8px; font-size: 1rem; background-color: var(--ios-bg); box-sizing: border-box; -webkit-appearance: none; }
-        button { width: 100%; background-color: var(--ios-blue); color: white; border: none; padding: 16px; font-size: 1.1rem; font-weight: 600; border-radius: 12px; margin-top: 20px; }
-        .turno-item { border-bottom: 1px solid #E5E5EA; padding: 12px 0; display: flex; justify-content: space-between; align-items: center; }
-        .btn-delete { background-color: #FF3B30; color: white; border: none; padding: 8px 12px; border-radius: 8px; }
+        body { font-family: -apple-system, sans-serif; background-color: #F2F2F7; margin: 0; padding: 20px; }
+        .card { background-color: #FFF; border-radius: 12px; padding: 16px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        input, select { width: 100%; padding: 12px; border: 1px solid #E5E5EA; border-radius: 8px; margin-bottom: 10px; box-sizing: border-box; }
+        button { width: 100%; background-color: #007AFF; color: white; border: none; padding: 16px; border-radius: 12px; font-weight: bold; }
+        .btn-delete { background-color: #FF3B30; padding: 8px; }
     </style>
 </head>
 <body>
-
-    <header style="text-align: center; font-weight: 600; font-size: 1.2rem; margin-bottom: 20px;">Alexstyle - Gestión</header>
-
     <div class="card">
         <h3>Nuevo Turno</h3>
-        <label for="nombre">Nombre del cliente</label>
-        <input type="text" id="nombre" placeholder="Ej: Juan Pérez">
-        
-        <label for="fecha">Fecha</label>
+        <input type="text" id="nombre" placeholder="Nombre del cliente">
         <input type="date" id="fecha" onchange="actualizarHorarios()">
-        
-        <label for="hora">Hora disponible</label>
         <select id="hora"></select>
-        
-        <button onclick="guardarTurno()">Reservar Turno</button>
+        <button onclick="guardarTurno()">Reservar</button>
     </div>
-
-    <h3 style="color: var(--ios-gray); font-size: 0.9rem; text-transform: uppercase;">Próximos Turnos</h3>
-    <div class="card" id="lista-turnos"></div>
+    <div id="lista-turnos"></div>
 
     <script>
         const todosLosHorarios = ["10:20", "11:00", "11:40", "12:20", "14:40", "15:20", "16:00", "16:40", "17:20", "18:00", "18:40", "19:20", "20:00", "20:40", "21:20"];
@@ -48,17 +30,12 @@
         function actualizarHorarios() {
             const fechaSeleccionada = document.getElementById('fecha').value;
             const selectHora = document.getElementById('hora');
-            selectHora.innerHTML = '<option value="">Selecciona una hora</option>';
-            
-            // Filtramos los turnos ya ocupados para esa fecha
             const ocupados = turnos.filter(t => t.fecha === fechaSeleccionada).map(t => t.hora);
             
+            selectHora.innerHTML = '<option value="">Selecciona hora libre</option>';
             todosLosHorarios.forEach(h => {
                 if (!ocupados.includes(h)) {
-                    let opt = document.createElement('option');
-                    opt.value = h;
-                    opt.textContent = h;
-                    selectHora.appendChild(opt);
+                    selectHora.innerHTML += `<option value="${h}">${h}</option>`;
                 }
             });
         }
@@ -68,12 +45,10 @@
             const fecha = document.getElementById('fecha').value;
             const hora = document.getElementById('hora').value;
 
-            if (!nombre || !fecha || !hora) return alert("Completa todos los campos");
+            if (!nombre || !fecha || !hora) return alert("Completa todo");
 
             turnos.push({ id: Date.now(), nombre, fecha, hora });
-            turnos.sort((a, b) => new Date(a.fecha + 'T' + a.hora) - new Date(b.fecha + 'T' + b.hora));
             localStorage.setItem('turnos_iphone', JSON.stringify(turnos));
-            
             document.getElementById('nombre').value = '';
             actualizarHorarios();
             renderizarTurnos();
@@ -88,16 +63,18 @@
 
         function renderizarTurnos() {
             const cont = document.getElementById('lista-turnos');
-            cont.innerHTML = turnos.length === 0 ? '<p>No hay turnos.</p>' : '';
+            cont.innerHTML = '<h3>Próximos</h3>';
             turnos.forEach(t => {
                 cont.innerHTML += `
-                    <div class="turno-item">
-                        <div><h4>${t.nombre}</h4><p>${t.fecha} - ${t.hora} hs</p></div>
+                    <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>${t.nombre} - ${t.fecha} ${t.hora}</div>
                         <button class="btn-delete" onclick="eliminarTurno(${t.id})">Anular</button>
                     </div>`;
             });
         }
+
         renderizarTurnos();
+        actualizarHorarios();
     </script>
 </body>
 </html>
