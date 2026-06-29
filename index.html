@@ -24,8 +24,8 @@
 <body>
 
     <div class="card">
-        <h3>Precio del Corte</h3>
-        <input type="number" id="input-precio" placeholder="Nuevo precio">
+        <h3>Precio actual del corte ($)</h3>
+        <input type="number" id="input-precio">
         <button onclick="guardarPrecio()" style="background-color: #5856d6;">Actualizar Precio</button>
     </div>
 
@@ -59,7 +59,12 @@
     </div>
 
     <script>
+        // Carga el precio guardado o usa 15000 por defecto
         let PRECIO_CORTE = parseInt(localStorage.getItem('precio_corte')) || 15000;
+        
+        // Al cargar la página, pone el precio actual en el input
+        document.getElementById('input-precio').value = PRECIO_CORTE;
+
         const todosLosHorarios = ["10:20", "11:00", "11:40", "12:20", "13:00", "14:40", "15:20", "16:00", "16:40", "17:20", "18:00", "18:40", "19:20", "20:00", "20:40", "21:20"];
         
         let turnos = JSON.parse(localStorage.getItem('turnos_iphone')) || [];
@@ -70,7 +75,7 @@
             if (nuevoPrecio > 0) {
                 localStorage.setItem('precio_corte', nuevoPrecio);
                 PRECIO_CORTE = parseInt(nuevoPrecio);
-                alert("Precio actualizado a $" + PRECIO_CORTE);
+                alert("Precio fijado en: $" + PRECIO_CORTE);
                 renderizar();
             }
         }
