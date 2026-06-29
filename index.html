@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Alexstyle - Dark Mode</title>
+    <title>Alexstyle - Gestión</title>
     <style>
-        /* Estilos en modo oscuro */
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #000; color: #fff; margin: 0; padding: 15px; }
         .card { background-color: #1c1c1e; border-radius: 12px; padding: 16px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
         h3 { margin-top: 0; font-size: 1.1rem; color: #fff; }
@@ -23,6 +22,12 @@
     </style>
 </head>
 <body>
+
+    <div class="card">
+        <h3>Precio del Corte</h3>
+        <input type="number" id="input-precio" placeholder="Nuevo precio">
+        <button onclick="guardarPrecio()" style="background-color: #5856d6;">Actualizar Precio</button>
+    </div>
 
     <div class="card">
         <h3>Nuevo Turno</h3>
@@ -53,11 +58,21 @@
     </div>
 
     <script>
-        const PRECIO_CORTE = 15000;
+        let PRECIO_CORTE = parseInt(localStorage.getItem('precio_corte')) || 15000;
         const todosLosHorarios = ["10:20", "11:00", "11:40", "12:20", "13:00", "14:40", "15:20", "16:00", "16:40", "17:20", "18:00", "18:40", "19:20", "20:00", "20:40", "21:20"];
         
         let turnos = JSON.parse(localStorage.getItem('turnos_iphone')) || [];
         let fiados = JSON.parse(localStorage.getItem('fiados_iphone')) || [];
+
+        function guardarPrecio() {
+            const nuevoPrecio = document.getElementById('input-precio').value;
+            if (nuevoPrecio > 0) {
+                localStorage.setItem('precio_corte', nuevoPrecio);
+                PRECIO_CORTE = parseInt(nuevoPrecio);
+                alert("Precio actualizado a $" + PRECIO_CORTE);
+                renderizar();
+            }
+        }
 
         function renderizar() {
             turnos.sort((a, b) => new Date(a.fecha + 'T' + a.hora) - new Date(b.fecha + 'T' + b.hora));
@@ -150,6 +165,7 @@
 
         function calcularRecaudacion() {
             const haceUnaSemana = new Date(); haceUnaSemana.setDate(haceUnaSemana.getDate() - 7);
+            // Multiplicamos por el precio dinámico actual
             const total = turnos.filter(t => new Date(t.fecha + 'T00:00:00') >= haceUnaSemana).length * PRECIO_CORTE;
             document.getElementById('total-recaudado').innerText = '$' + total.toLocaleString('es-AR');
         }
