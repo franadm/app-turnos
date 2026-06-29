@@ -14,8 +14,8 @@
         .turno-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #3a3a3c; border-radius: 8px; }
         .turno-hoy { border-left: 5px solid #007AFF; background-color: #121215; }
         
-        .btn-delete { background-color: #FF3B30; padding: 8px 0; font-size: 0.85rem; color: white; border-radius: 8px; border: none; width: 70px; flex-shrink: 0; text-align: center; }
-        .btn-pay { background-color: #34C759; padding: 8px 0; font-size: 0.85rem; color: white; border-radius: 8px; border: none; width: 70px; flex-shrink: 0; text-align: center; }
+        .btn-delete { background-color: #FF3B30; padding: 8px 0; font-size: 0.85rem; color: white; border-radius: 8px; border: none; width: 80px; flex-shrink: 0; text-align: center; }
+        .btn-pay { background-color: #34C759; padding: 8px 0; font-size: 0.85rem; color: white; border-radius: 8px; border: none; width: 80px; flex-shrink: 0; text-align: center; }
         
         .card-blue { background-color: #007AFF; color: white; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border-radius: 12px; margin-bottom: 15px; }
         .historial { color: #8e8e93; font-size: 0.85rem; }
@@ -24,8 +24,8 @@
 <body>
 
     <div class="card">
-        <h3>Precio actual del corte ($)</h3>
-        <input type="number" id="input-precio">
+        <h3>Precio del Corte</h3>
+        <input type="number" id="input-precio" placeholder="Nuevo precio">
         <button onclick="guardarPrecio()" style="background-color: #5856d6;">Actualizar Precio</button>
     </div>
 
@@ -40,7 +40,6 @@
     <div class="card">
         <h3>Pendientes de Pago (Fiados)</h3>
         <input type="text" id="nombre-fiado" placeholder="Nombre del cliente">
-        <input type="number" id="monto-fiado" placeholder="Monto adeudado ($)">
         <button onclick="agregarFiado()" style="background-color: #FF9500;">Agregar a Pendientes</button>
         <div id="contenedor-pendientes"></div>
     </div>
@@ -60,8 +59,6 @@
 
     <script>
         let PRECIO_CORTE = parseInt(localStorage.getItem('precio_corte')) || 15000;
-        document.getElementById('input-precio').value = PRECIO_CORTE;
-
         const todosLosHorarios = ["10:20", "11:00", "11:40", "12:20", "13:00", "14:40", "15:20", "16:00", "16:40", "17:20", "18:00", "18:40", "19:20", "20:00", "20:40", "21:20"];
         
         let turnos = JSON.parse(localStorage.getItem('turnos_iphone')) || [];
@@ -72,7 +69,7 @@
             if (nuevoPrecio > 0) {
                 localStorage.setItem('precio_corte', nuevoPrecio);
                 PRECIO_CORTE = parseInt(nuevoPrecio);
-                alert("Precio fijado en: $" + PRECIO_CORTE);
+                alert("Precio actualizado a $" + PRECIO_CORTE);
                 renderizar();
             }
         }
@@ -98,7 +95,7 @@
             contFiados.innerHTML = '';
             fiados.forEach(f => {
                 contFiados.innerHTML += `<div class="turno-row">
-                    <div><strong>${f.nombre}</strong><br><small style="color:#FF9500;">Debe: $${f.monto}</small></div>
+                    <strong>${f.nombre}</strong>
                     <div>
                         <button class="btn-pay" onclick="pagarFiado(${f.id})">Pagado</button>
                         <button class="btn-delete" onclick="eliminarFiado(${f.id})">Eliminar</button>
@@ -111,18 +108,16 @@
 
         function agregarFiado() {
             const nombre = document.getElementById('nombre-fiado').value;
-            const monto = document.getElementById('monto-fiado').value;
-            if (!nombre || !monto) return alert("Completa nombre y monto");
-            fiados.push({ id: Date.now(), nombre, monto });
+            if (!nombre) return alert("Ingresa un nombre");
+            fiados.push({ id: Date.now(), nombre });
             localStorage.setItem('fiados_iphone', JSON.stringify(fiados));
             document.getElementById('nombre-fiado').value = '';
-            document.getElementById('monto-fiado').value = '';
             renderizar();
         }
 
         function pagarFiado(id) {
             const fiado = fiados.find(f => f.id === id);
-            if (confirm(`¿Confirmar que ${fiado.nombre} pagó $${fiado.monto}?`)) {
+            if (confirm(`¿Confirmar que ${fiado.nombre} ya pagó?`)) {
                 fiados = fiados.filter(f => f.id !== id);
                 localStorage.setItem('fiados_iphone', JSON.stringify(fiados));
                 renderizar();
@@ -131,7 +126,7 @@
 
         function eliminarFiado(id) {
             const fiado = fiados.find(f => f.id === id);
-            if (confirm(`¿Eliminar pendiente de ${fiado.nombre}?`)) {
+            if (confirm(`¿Estás seguro de eliminar el pendiente de ${fiado.nombre}?`)) {
                 fiados = fiados.filter(f => f.id !== id);
                 localStorage.setItem('fiados_iphone', JSON.stringify(fiados));
                 renderizar();
@@ -152,7 +147,7 @@
 
         function eliminarTurno(id) {
             const turnoAEliminar = turnos.find(t => t.id === id);
-            if (confirm(`¿Anular turno de ${turnoAEliminar.nombre}?`)) {
+            if (confirm(`¿Estás seguro de que quieres anular el turno de ${turnoAEliminar.nombre}?`)) {
                 turnos = turnos.filter(t => t.id !== id);
                 localStorage.setItem('turnos_iphone', JSON.stringify(turnos));
                 actualizarHorarios();
@@ -169,20 +164,9 @@
         }
 
         function calcularRecaudacion() {
-            const haceUnaSemana = new Date(); 
-            haceUnaSemana.setDate(haceUnaSemana.getDate() - 7);
-            
-            // 1. Total por turnos (Cantidad de turnos * Precio)
-            const totalTurnos = turnos.filter(t => new Date(t.fecha + 'T00:00:00') >= haceUnaSemana).length * PRECIO_CORTE;
-            
-            // 2. Suma de lo que falta cobrar (lo que está en la lista de fiados)
-            let totalPendiente = 0;
-            fiados.forEach(f => {
-                totalPendiente += parseInt(f.monto);
-            });
-
-            // 3. Recaudación real en mano
-            const total = totalTurnos - totalPendiente;
+            const haceUnaSemana = new Date(); haceUnaSemana.setDate(haceUnaSemana.getDate() - 7);
+            // Multiplicamos por el precio dinámico actual
+            const total = turnos.filter(t => new Date(t.fecha + 'T00:00:00') >= haceUnaSemana).length * PRECIO_CORTE;
             document.getElementById('total-recaudado').innerText = '$' + total.toLocaleString('es-AR');
         }
 
