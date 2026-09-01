@@ -1,36 +1,92 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ALEXSTYLE - Gestión de Turnos y Cobros</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-gray-100 font-sans antialiased pb-20">
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100 font-sans antialiased pb-20 transition-colors duration-200">
 
     <!-- Header / Fecha Actual -->
-    <header class="bg-indigo-600 text-white p-4 shadow-md sticky top-0 z-50">
+    <header class="bg-indigo-600 dark:bg-indigo-900 text-white p-4 shadow-md sticky top-0 z-40 transition-colors duration-200">
         <div class="max-w-4xl mx-auto flex justify-between items-center">
             <h1 class="text-xl font-bold"><i class="fa-solid fa-scissors mr-2"></i>ALEXSTYLE</h1>
-            <div id="fecha-actual" class="text-sm bg-indigo-700 px-3 py-1 rounded-full"></div>
+            <div class="flex items-center gap-3">
+                <div id="fecha-actual" class="text-xs md:text-sm bg-indigo-700 dark:bg-indigo-950 px-3 py-1 rounded-full hidden sm:block"></div>
+                <!-- Botón Tuerca Ajustes -->
+                <button onclick="toggleMenuAjustes()" class="bg-indigo-700 dark:bg-indigo-950 hover:bg-indigo-800 px-3 py-1.5 rounded-lg text-sm transition">
+                    <i class="fa-solid fa-gear"></i>
+                </button>
+            </div>
         </div>
     </header>
+
+    <!-- MENÚ FLOTANTE DE AJUSTES (TUERCA) -->
+    <div id="menu-ajustes" class="hidden fixed top-16 right-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-2xl rounded-xl p-4 w-72 md:w-80 z-50 transition-colors duration-200">
+        <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-100 dark:border-gray-700">
+            <span class="font-bold text-sm text-gray-700 dark:text-gray-200"><i class="fa-solid fa-sliders mr-1 text-indigo-600"></i> Ajustes y Caja</span>
+            <button onclick="toggleMenuAjustes()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        
+        <div class="space-y-4">
+            <!-- Selector Tema Día/Noche -->
+            <div class="flex justify-between items-center">
+                <span class="text-sm"><i class="fa-solid fa-moon mr-2 text-indigo-500"></i> Modo Noche</span>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="check-modo-oscuro" onchange="cambiarTema()" class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                </label>
+            </div>
+
+            <!-- APARTADO DE CAJA / INGRESOS REALES -->
+            <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
+                <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wide block mb-2">
+                    <i class="fa-solid fa-wallet mr-1"></i> Caja Real (Sin Fiados)
+                </span>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between items-center bg-white dark:bg-gray-800 p-2 rounded-lg shadow-sm">
+                        <span class="text-gray-500 dark:text-gray-400 text-xs">Hoy:</span>
+                        <span id="caja-hoy" class="font-bold text-emerald-600 dark:text-emerald-400">$0</span>
+                    </div>
+                    <div class="flex justify-between items-center bg-white dark:bg-gray-800 p-2 rounded-lg shadow-sm">
+                        <span class="text-gray-500 dark:text-gray-400 text-xs">Esta Semana:</span>
+                        <span id="caja-semana" class="font-bold text-indigo-600 dark:text-indigo-400">$0</span>
+                    </div>
+                    <div class="flex justify-between items-center bg-white dark:bg-gray-800 p-2 rounded-lg shadow-sm">
+                        <span class="text-gray-500 dark:text-gray-400 text-xs">Este Mes:</span>
+                        <span id="caja-mes" class="font-bold text-blue-600 dark:text-blue-400">$0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Acceso directo a Servicios -->
+            <button onclick="cambiarTab('servicios'); toggleMenuAjustes();" class="w-full text-left text-sm py-2 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition flex items-center">
+                <i class="fa-solid fa-list-check mr-2 text-indigo-500"></i> Gestionar Servicios
+            </button>
+        </div>
+    </div>
 
     <!-- Contenido Principal -->
     <main class="max-w-4xl mx-auto p-4">
         
         <!-- PESTAÑA 1: TURNOS / AGENDA -->
         <section id="tab-hoy" class="tab-content">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3 bg-white p-4 rounded-xl shadow-sm">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm transition-colors duration-200">
                 <div>
-                    <h2 class="text-xl font-bold text-gray-800">Agenda de Turnos</h2>
-                    <p class="text-xs text-gray-500">Selecciona una fecha para ver o administrar los turnos.</p>
+                    <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">Agenda de Turnos</h2>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Selecciona una fecha para ver o administrar los turnos.</p>
                 </div>
                 <div class="flex items-center gap-2 w-full md:w-auto justify-between">
-                    <input type="date" id="filtro-fecha" onchange="cambiarFechaFiltro()" class="border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500">
+                    <input type="date" id="filtro-fecha" onchange="cambiarFechaFiltro()" class="border border-gray-300 dark:border-gray-700 bg-transparent rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500">
                     <button onclick="abrirModalTurno()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow font-medium text-sm whitespace-nowrap">
                         <i class="fa-solid fa-plus mr-1"></i> Nuevo Turno
                     </button>
@@ -44,9 +100,12 @@
 
         <!-- PESTAÑA 2: SERVICIOS -->
         <section id="tab-servicios" class="tab-content hidden">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-2xl font-bold text-gray-800">Gestión de Servicios</h2>
-                <button onclick="abrirModalServicio()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow font-medium text-sm">
+            <div class="flex justify-between items-center mb-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">Gestión de Servicios</h2>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Agrega o elimina los precios y tipos de servicios.</p>
+                </div>
+                <button onclick="abrirModalServicio()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow font-medium text-sm whitespace-nowrap">
                     <i class="fa-solid fa-plus mr-1"></i> Agregar Servicio
                 </button>
             </div>
@@ -57,13 +116,13 @@
 
         <!-- PESTAÑA 3: FIADOS -->
         <section id="tab-fiados" class="tab-content hidden">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3 bg-white p-4 rounded-xl shadow-sm">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm transition-colors duration-200">
                 <div>
-                    <h2 class="text-xl font-bold text-gray-800">Cuentas Corrientes (Fiados)</h2>
-                    <p class="text-xs text-gray-500">Historial detallado y pagos parciales.</p>
+                    <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">Cuentas Corrientes (Fiados)</h2>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Historial detallado y pagos parciales.</p>
                 </div>
                 <div class="w-full md:w-72">
-                    <input type="text" id="buscador-fiados" oninput="renderFiados()" placeholder="🔍 Buscar cliente..." class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-amber-500 uppercase">
+                    <input type="text" id="buscador-fiados" oninput="renderFiados()" placeholder="🔍 Buscar cliente..." class="w-full border border-gray-300 dark:border-gray-700 bg-transparent rounded-lg p-2 text-sm focus:ring-2 focus:ring-amber-500 uppercase">
                 </div>
             </div>
             <div id="lista-fiados" class="space-y-4">
@@ -74,13 +133,10 @@
     </main>
 
     <!-- Barra de Navegación Inferior -->
-    <nav class="bg-white border-t border-gray-200 fixed bottom-0 left-0 right-0 shadow-lg">
+    <nav class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 fixed bottom-0 left-0 right-0 shadow-lg transition-colors duration-200 z-30">
         <div class="max-w-4xl mx-auto flex justify-around py-3">
-            <button onclick="cambiarTab('hoy')" id="btn-tab-hoy" class="flex flex-col items-center text-indigo-600 font-semibold text-xs">
+            <button onclick="cambiarTab('hoy')" id="btn-tab-hoy" class="flex flex-col items-center text-indigo-600 dark:text-indigo-400 font-semibold text-xs">
                 <i class="fa-solid fa-calendar-day text-xl mb-1"></i> Agenda
-            </button>
-            <button onclick="cambiarTab('servicios')" id="btn-tab-servicios" class="flex flex-col items-center text-gray-400 font-semibold text-xs">
-                <i class="fa-solid fa-list-check text-xl mb-1"></i> Servicios
             </button>
             <button onclick="cambiarTab('fiados')" id="btn-tab-fiados" class="flex flex-col items-center text-gray-400 font-semibold text-xs">
                 <i class="fa-solid fa-book-open text-xl mb-1"></i> Fiados
@@ -90,39 +146,39 @@
 
     <!-- MODAL NUEVO TURNO / CLIENTE -->
     <div id="modal-turno" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-            <button onclick="cerrarModalTurno()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl"><i class="fa-solid fa-xmark"></i></button>
-            <h3 class="text-xl font-bold text-gray-800 mb-4"><i class="fa-solid fa-user-plus mr-2 text-indigo-600"></i>Nuevo Cliente / Turno</h3>
+        <div class="bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 rounded-xl max-w-md w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto transition-colors duration-200">
+            <button onclick="cerrarModalTurno()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xl"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="text-xl font-bold mb-4"><i class="fa-solid fa-user-plus mr-2 text-indigo-600"></i>Nuevo Cliente / Turno</h3>
             
             <form id="form-turno" onsubmit="guardarTurno(event)">
                 <div class="mb-3">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">👤 Nombre del Cliente</label>
-                    <input type="text" id="input-nombre" required class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 uppercase" placeholder="Ej: FER">
+                    <label class="block text-sm font-medium mb-1">👤 Nombre del Cliente</label>
+                    <input type="text" id="input-nombre" required class="w-full border border-gray-300 dark:border-gray-700 bg-transparent rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 uppercase" placeholder="Ej: FER">
                 </div>
                 
                 <div class="mb-3">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">📅 Fecha del Turno</label>
-                    <input type="date" id="input-fecha" required onchange="actualizarHorariosDisponibles()" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500">
-                    <p class="text-xs text-gray-500 mt-1">Lunes a Jueves con horario. Viernes y Sábados por orden de llegada.</p>
+                    <label class="block text-sm font-medium mb-1">📅 Fecha del Turno</label>
+                    <input type="date" id="input-fecha" required onchange="actualizarHorariosDisponibles()" class="w-full border border-gray-300 dark:border-gray-700 bg-transparent rounded-lg p-2 focus:ring-2 focus:ring-indigo-500">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Lunes a Jueves con horario. Viernes y Sábados por orden de llegada.</p>
                 </div>
 
                 <div class="mb-3">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">⏰ Horario (Cada 40 min)</label>
-                    <select id="input-hora" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500">
+                    <label class="block text-sm font-medium mb-1">⏰ Horario (Cada 40 min)</label>
+                    <select id="input-hora" class="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-700 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500">
                         <option value="">-- Seleccionar hora --</option>
                     </select>
                 </div>
 
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">🛠️ Seleccionar Servicio</label>
-                    <div id="selector-servicios-turno" class="space-y-2 border border-gray-200 p-3 rounded-lg max-h-40 overflow-y-auto">
+                    <label class="block text-sm font-medium mb-1">🛠️ Seleccionar Servicio</label>
+                    <div id="selector-servicios-turno" class="space-y-2 border border-gray-200 dark:border-gray-700 p-3 rounded-lg max-h-40 overflow-y-auto">
                         <!-- Dinámico -->
                     </div>
                 </div>
 
-                <div class="bg-gray-50 p-3 rounded-lg mb-4 flex justify-between items-center">
-                    <span class="font-bold text-gray-700">Total Seleccionado:</span>
-                    <span id="modal-total-estimado" class="font-bold text-indigo-600 text-lg">$0</span>
+                <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg mb-4 flex justify-between items-center">
+                    <span class="font-bold">Total Seleccionado:</span>
+                    <span id="modal-total-estimado" class="font-bold text-indigo-600 dark:text-indigo-400 text-lg">$0</span>
                 </div>
 
                 <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg font-semibold shadow">Crear Turno</button>
@@ -132,25 +188,25 @@
 
     <!-- MODAL NUEVO SERVICIO -->
     <div id="modal-servicio" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-xl max-w-sm w-full p-6 shadow-2xl relative">
-            <button onclick="cerrarModalServicio()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl"><i class="fa-solid fa-xmark"></i></button>
-            <h3 class="text-xl font-bold text-gray-800 mb-4">Agregar Nuevo Servicio</h3>
+        <div class="bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 rounded-xl max-w-sm w-full p-6 shadow-2xl relative transition-colors duration-200">
+            <button onclick="cerrarModalServicio()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xl"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="text-xl font-bold mb-4">Agregar Nuevo Servicio</h3>
             <form onsubmit="guardarNuevoServicio(event)">
                 <div class="mb-3">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
-                    <select id="serv-cat" class="w-full border border-gray-300 rounded-lg p-2" required>
+                    <label class="block text-sm font-medium mb-1">Categoría</label>
+                    <select id="serv-cat" class="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-700 rounded-lg p-2" required>
                         <option value="CABELLO">Cabello</option>
                         <option value="COLOR">Color</option>
                         <option value="BARBA">Barba</option>
                     </select>
                 </div>
                 <div class="mb-3">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Servicio</label>
-                    <input type="text" id="serv-nombre" class="w-full border border-gray-300 rounded-lg p-2" required placeholder="Ej: Corte Degradé">
+                    <label class="block text-sm font-medium mb-1">Nombre del Servicio</label>
+                    <input type="text" id="serv-nombre" class="w-full border border-gray-300 dark:border-gray-700 bg-transparent rounded-lg p-2" required placeholder="Ej: Corte Degradé">
                 </div>
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Precio ($)</label>
-                    <input type="number" id="serv-precio" class="w-full border border-gray-300 rounded-lg p-2" required placeholder="15000">
+                    <label class="block text-sm font-medium mb-1">Precio ($)</label>
+                    <input type="number" id="serv-precio" class="w-full border border-gray-300 dark:border-gray-700 bg-transparent rounded-lg p-2" required placeholder="15000">
                 </div>
                 <button type="submit" class="w-full bg-indigo-600 text-white py-2 rounded-lg font-semibold">Guardar Servicio</button>
             </form>
@@ -159,6 +215,32 @@
 
     <!-- Script de Lógica -->
     <script>
+        // Inicializar Tema Nocturno / Diurno
+        const temaGuardado = localStorage.getItem('theme') || 'light';
+        if (temaGuardado === 'dark') {
+            document.documentElement.classList.add('dark');
+            document.getElementById('check-modo-oscuro').checked = true;
+        }
+
+        function cambiarTema() {
+            const isDark = document.getElementById('check-modo-oscuro').checked;
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        function toggleMenuAjustes() {
+            const menu = document.getElementById('menu-ajustes');
+            menu.classList.toggle('hidden');
+            if(!menu.classList.contains('hidden')) {
+                calcularCajaReal();
+            }
+        }
+
         const fechaHoyObj = new Date();
         const opcionesFecha = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
         document.getElementById('fecha-actual').innerText = fechaHoyObj.toLocaleDateString('es-ES', opcionesFecha);
@@ -177,6 +259,7 @@
         ];
 
         let fiados = JSON.parse(localStorage.getItem('fiados')) || [];
+        let cajaRegistros = JSON.parse(localStorage.getItem('cajaRegistros')) || [];
         let servicioSeleccionado = null;
 
         const listaHorariosBase = [
@@ -189,14 +272,16 @@
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.getElementById(`tab-${tab}`).classList.remove('hidden');
 
-            ['hoy', 'servicios', 'fiados'].forEach(t => {
+            ['hoy', 'fiados'].forEach(t => {
                 const btn = document.getElementById(`btn-tab-${t}`);
-                if (t === tab) {
-                    btn.classList.remove('text-gray-400');
-                    btn.classList.add('text-indigo-600');
-                } else {
-                    btn.classList.remove('text-indigo-600');
-                    btn.classList.add('text-gray-400');
+                if(btn) {
+                    if (t === tab) {
+                        btn.classList.remove('text-gray-400');
+                        btn.classList.add('text-indigo-600', 'dark:text-indigo-400');
+                    } else {
+                        btn.classList.remove('text-indigo-600', 'dark:text-indigo-400');
+                        btn.classList.add('text-gray-400');
+                    }
                 }
             });
 
@@ -217,31 +302,31 @@
             const turnosFiltrados = turnos.filter(t => t.fecha === fechaSeleccionada && t.estado === 'pendiente');
 
             if (turnosFiltrados.length === 0) {
-                contenedor.innerHTML = `<div class="text-center py-10 text-gray-400 bg-white rounded-xl shadow-sm p-6"><i class="fa-solid fa-mug-hot text-4xl mb-2"></i><p>No hay turnos agendados para esta fecha.</p></div>`;
+                contenedor.innerHTML = `<div class="text-center py-10 text-gray-400 bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6"><i class="fa-solid fa-mug-hot text-4xl mb-2"></i><p>No hay turnos agendados para esta fecha.</p></div>`;
                 return;
             }
 
             turnosFiltrados.forEach(t => {
                 let itemsHtml = t.items.map(i => `
-                    <div class="flex justify-between text-sm py-1 border-b border-gray-100">
+                    <div class="flex justify-between text-sm py-1 border-b border-gray-100 dark:border-gray-700">
                         <span>• ${i.nombre}</span>
                         <span class="font-medium">$${i.precio}</span>
                     </div>
                 `).join('');
 
                 contenedor.innerHTML += `
-                    <div class="bg-white rounded-xl shadow-md p-5 border-l-4 border-indigo-500">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-5 border-l-4 border-indigo-500 transition-colors duration-200">
                         <div class="flex justify-between items-center mb-2">
-                            <span class="text-sm font-bold bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-md">
+                            <span class="text-sm font-bold bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 px-2.5 py-1 rounded-md">
                                 <i class="fa-regular fa-clock mr-1"></i> ${t.hora || 'Orden de llegada'}
                             </span>
-                            <span class="text-base font-bold text-gray-800">
+                            <span class="text-base font-bold text-gray-800 dark:text-gray-100">
                                 <i class="fa-solid fa-user mr-1 text-gray-500"></i> ${t.nombre}
                             </span>
                         </div>
                         <div class="my-3">${itemsHtml}</div>
-                        <div class="flex flex-wrap justify-between items-center mt-3 pt-2 border-t border-gray-200 gap-2">
-                            <span class="font-bold text-gray-700">Total: $${t.total}</span>
+                        <div class="flex flex-wrap justify-between items-center mt-3 pt-2 border-t border-gray-200 dark:border-gray-700 gap-2">
+                            <span class="font-bold text-gray-700 dark:text-gray-300">Total: $${t.total}</span>
                             <div class="flex flex-wrap gap-1">
                                 <button onclick="cobrar(${t.id}, 'EFECTIVO')" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs px-2.5 py-1.5 rounded font-medium">Efectivo</button>
                                 <button onclick="cobrar(${t.id}, 'TRANSFERENCIA')" class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-2.5 py-1.5 rounded font-medium">Transferencia</button>
@@ -276,9 +361,7 @@
                 mensajeConfirmacion = `¿Confirmas registrar como FIADO el monto de $${turno.total} para ${turno.nombre}?`;
             }
 
-            if (!confirm(mensajeConfirmacion)) {
-                return;
-            }
+            if (!confirm(mensajeConfirmacion)) return;
 
             turno.estado = 'completado';
 
@@ -300,11 +383,53 @@
                 localStorage.setItem('fiados', JSON.stringify(fiados));
                 alert(`¡Registrado como FIADO para ${turno.nombre}!`);
             } else {
+                cajaRegistros.push({
+                    id: Date.now(),
+                    fecha: fechaHoyStr,
+                    monto: turno.total,
+                    metodo: metodo,
+                    concepto: `Turno: ${turno.nombre}`
+                });
+                localStorage.setItem('cajaRegistros', JSON.stringify(cajaRegistros));
                 alert(`¡Cobro de $${turno.total} realizado con éxito vía ${metodo}!`);
             }
 
             localStorage.setItem('turnos', JSON.stringify(turnos));
             renderTurnosFecha();
+        }
+
+        function calcularCajaReal() {
+            let hoy = new Date().toISOString().split('T')[0];
+            let fechaActualObj = new Date();
+            let anioActual = fechaActualObj.getFullYear();
+            let mesActual = fechaActualObj.getMonth();
+
+            let totalHoy = 0;
+            let totalSemana = 0;
+            let totalMes = 0;
+
+            let diaSemana = fechaActualObj.getDay();
+            let diffLunes = fechaActualObj.getDate() - diaSemana + (diaSemana === 0 ? -6 : 1);
+            let lunesObj = new Date(fechaActualObj.setDate(diffLunes));
+            lunesObj.setHours(0,0,0,0);
+
+            cajaRegistros.forEach(reg => {
+                let regFechaObj = new Date(reg.fecha + 'T00:00:00');
+
+                if (reg.fecha === hoy) {
+                    totalHoy += reg.monto;
+                }
+                if (regFechaObj >= lunesObj && regFechaObj <= new Date()) {
+                    totalSemana += reg.monto;
+                }
+                if (regFechaObj.getFullYear() === anioActual && regFechaObj.getMonth() === mesActual) {
+                    totalMes += reg.monto;
+                }
+            });
+
+            document.getElementById('caja-hoy').innerText = `$${totalHoy}`;
+            document.getElementById('caja-semana').innerText = `$${totalSemana}`;
+            document.getElementById('caja-mes').innerText = `$${totalMes}`;
         }
 
         function compartirWhatsApp(id) {
@@ -337,9 +462,9 @@
             servicios.forEach((s) => {
                 let isSelected = servicioSeleccionado && servicioSeleccionado.id === s.id;
                 contenedor.innerHTML += `
-                    <div onclick='seleccionarServicio(${JSON.stringify(s)})' class="cursor-pointer p-2.5 rounded-lg border transition flex justify-between items-center ${isSelected ? 'border-indigo-600 bg-indigo-50 font-semibold' : 'border-gray-200 hover:bg-gray-50'}">
+                    <div onclick='seleccionarServicio(${JSON.stringify(s)})' class="cursor-pointer p-2.5 rounded-lg border transition flex justify-between items-center ${isSelected ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-950 font-semibold' : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'}">
                         <span>${s.nombre}</span>
-                        <span class="text-indigo-600">$${s.precio}</span>
+                        <span class="text-indigo-600 dark:text-indigo-400">$${s.precio}</span>
                     </div>
                 `;
             });
@@ -408,10 +533,10 @@
             categorias.forEach(cat => {
                 let serviciosCat = servicios.filter(s => s.categoria === cat);
                 let htmlItems = serviciosCat.length > 0 ? serviciosCat.map(s => `
-                    <div class="flex justify-between items-center bg-white p-3 rounded-lg shadow-sm mb-2">
-                        <span class="text-gray-700 font-medium">${s.nombre}</span>
+                    <div class="flex justify-between items-center bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm mb-2 transition-colors duration-200">
+                        <span class="font-medium">${s.nombre}</span>
                         <div class="flex items-center space-x-3">
-                            <span class="text-indigo-600 font-bold">$${s.precio}</span>
+                            <span class="text-indigo-600 dark:text-indigo-400 font-bold">$${s.precio}</span>
                             <button onclick="eliminarServicio(${s.id})" class="text-red-400 hover:text-red-600"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     </div>
@@ -419,7 +544,7 @@
 
                 contenedor.innerHTML += `
                     <div>
-                        <h3 class="text-md font-bold text-gray-600 uppercase mb-2 border-b pb-1">${cat}</h3>
+                        <h3 class="text-md font-bold text-gray-600 dark:text-gray-400 uppercase mb-2 border-b dark:border-gray-700 pb-1">${cat}</h3>
                         ${htmlItems}
                     </div>
                 `;
@@ -439,7 +564,7 @@
             localStorage.setItem('servicios', JSON.stringify(servicios));
             cerrarModalServicio();
             renderServicios();
-            document.getElementById('form-servicio').reset();
+            e.target.reset();
         }
 
         function eliminarServicio(id) {
@@ -456,7 +581,7 @@
             const fiadosFiltrados = fiados.filter(f => f.nombre.includes(busqueda));
 
             if(fiadosFiltrados.length === 0) {
-                contenedor.innerHTML = `<div class="text-center py-10 text-gray-400 bg-white rounded-xl shadow-sm p-6"><i class="fa-solid fa-circle-check text-4xl mb-2 text-emerald-500"></i><p>No se encontraron cuentas corrientes pendientes.</p></div>`;
+                contenedor.innerHTML = `<div class="text-center py-10 text-gray-400 bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6"><i class="fa-solid fa-circle-check text-4xl mb-2 text-emerald-500"></i><p>No se encontraron cuentas corrientes pendientes.</p></div>`;
                 return;
             }
 
@@ -464,35 +589,34 @@
                 let detalleHtml = f.detalle.map(d => {
                     let itemsNombres = d.items.map(i => i.nombre).join(', ');
                     return `
-                        <div class="flex justify-between items-center text-xs py-2 border-b border-gray-100">
+                        <div class="flex justify-between items-center text-xs py-2 border-b border-gray-100 dark:border-gray-700">
                             <div>
-                                <span class="font-semibold text-gray-700">${d.fecha} (${d.hora})</span>
-                                <p class="text-gray-500">${itemsNombres}</p>
+                                <span class="font-semibold text-gray-700 dark:text-gray-300">${d.fecha} (${d.hora})</span>
+                                <p class="text-gray-500 dark:text-gray-400">${itemsNombres}</p>
                             </div>
-                            <span class="font-bold text-gray-800">$${d.total}</span>
+                            <span class="font-bold text-gray-800 dark:text-gray-100">$${d.total}</span>
                         </div>
                     `;
                 }).join('');
 
                 contenedor.innerHTML += `
-                    <div class="bg-white rounded-xl shadow-md p-4 border-l-4 border-amber-500">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 border-l-4 border-amber-500 transition-colors duration-200">
                         <div class="flex justify-between items-center mb-2">
-                            <span class="font-bold text-gray-800 text-lg"><i class="fa-solid fa-user-tag mr-2 text-amber-500"></i>${f.nombre}</span>
-                            <span class="text-lg font-bold text-red-600">Deuda: $${f.total}</span>
+                            <span class="font-bold text-gray-800 dark:text-gray-100 text-lg"><i class="fa-solid fa-user-tag mr-2 text-amber-500"></i>${f.nombre}</span>
+                            <span class="text-lg font-bold text-red-600 dark:text-red-400">Deuda: $${f.total}</span>
                         </div>
                         
-                        <!-- Historial desplegable -->
-                        <details class="group my-2 bg-gray-50 p-2.5 rounded-lg border border-gray-200">
-                            <summary class="cursor-pointer text-xs font-semibold text-indigo-600 flex justify-between items-center">
+                        <details class="group my-2 bg-gray-50 dark:bg-gray-700 p-2.5 rounded-lg border border-gray-200 dark:border-gray-600">
+                            <summary class="cursor-pointer text-xs font-semibold text-indigo-600 dark:text-indigo-400 flex justify-between items-center">
                                 <span>Ver detalle de servicios (${f.detalle.length})</span>
                                 <i class="fa-solid fa-chevron-down group-open:rotate-180 transition-transform"></i>
                             </summary>
-                            <div class="mt-2 pt-2 border-t border-gray-200 space-y-1">
+                            <div class="mt-2 pt-2 border-t border-gray-200 dark:border-gray-600 space-y-1">
                                 ${detalleHtml}
                             </div>
                         </details>
 
-                        <div class="flex flex-wrap justify-end gap-2 mt-3 pt-2 border-t border-gray-100">
+                        <div class="flex flex-wrap justify-end gap-2 mt-3 pt-2 border-t border-gray-100 dark:border-gray-700">
                             <button onclick="enviarWhatsAppFiado(${f.id})" class="bg-emerald-700 hover:bg-emerald-800 text-white text-xs px-3 py-1.5 rounded font-medium"><i class="fa-brands fa-whatsapp mr-1"></i> Cobrar por WhatsApp</button>
                             <button onclick="pagoParcial(${f.id})" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded font-medium">Abonar Parcial</button>
                             <button onclick="saldarFiado(${f.id})" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3 py-1.5 rounded font-semibold">Saldar Total</button>
@@ -531,6 +655,15 @@
                 total: -montoAbonado
             });
 
+            cajaRegistros.push({
+                id: Date.now(),
+                fecha: new Date().toISOString().split('T')[0],
+                monto: montoAbonado,
+                metodo: 'EFECTIVO/PARCIAL',
+                concepto: `Pago fiado: ${cliente.nombre}`
+            });
+            localStorage.setItem('cajaRegistros', JSON.stringify(cajaRegistros));
+
             localStorage.setItem('fiados', JSON.stringify(fiados));
             renderFiados();
             alert(`¡Pago parcial de $${montoAbonado} registrado con éxito! Nuevo saldo pendiente: $${cliente.total}`);
@@ -546,11 +679,24 @@
 
         function saldarFiado(id) {
             let cliente = fiados.find(f => f.id === id);
+            if(!cliente) return;
+
             if(confirm(`¿Estás seguro de que ${cliente.nombre} ha saldado su cuenta completa de $${cliente.total}?`)) {
+                let montoRestante = cliente.total;
+
+                cajaRegistros.push({
+                    id: Date.now(),
+                    fecha: new Date().toISOString().split('T')[0],
+                    monto: montoRestante,
+                    metodo: 'SALDO FIADO',
+                    concepto: `Saldó deuda: ${cliente.nombre}`
+                });
+                localStorage.setItem('cajaRegistros', JSON.stringify(cajaRegistros));
+
                 fiados = fiados.filter(f => f.id !== id);
                 localStorage.setItem('fiados', JSON.stringify(fiados));
                 renderFiados();
-                alert('¡Cuenta corriente saldada con éxito!');
+                alert('¡Cuenta corriente saldada y sumada a la caja con éxito!');
             }
         }
 
