@@ -2,182 +2,559 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Alexstyle - Gestión</title>
-    <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #000; color: #fff; margin: 0; padding: 15px; }
-        .card { background-color: #1c1c1e; border-radius: 12px; padding: 16px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
-        h3 { margin-top: 0; font-size: 1.1rem; color: #fff; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #3a3a3c; border-radius: 10px; margin-bottom: 10px; box-sizing: border-box; font-size: 16px; background-color: #2c2c2e; color: white; }
-        button { width: 100%; background-color: #007AFF; color: white; border: none; padding: 14px; border-radius: 10px; font-weight: 600; font-size: 16px; margin-bottom: 5px; }
-        
-        .turno-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #3a3a3c; border-radius: 8px; }
-        .turno-hoy { border-left: 5px solid #007AFF; background-color: #121215; }
-        
-        .btn-delete { background-color: #FF3B30; padding: 8px 0; font-size: 0.85rem; color: white; border-radius: 8px; border: none; width: 70px; flex-shrink: 0; text-align: center; }
-        .btn-pay { background-color: #34C759; padding: 8px 0; font-size: 0.85rem; color: white; border-radius: 8px; border: none; width: 70px; flex-shrink: 0; text-align: center; }
-        
-        .card-blue { background-color: #007AFF; color: white; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border-radius: 12px; margin-bottom: 15px; }
-        .historial { color: #8e8e93; font-size: 0.85rem; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALEXSTYLE - Gestión de Turnos y Cobros</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body class="bg-gray-100 font-sans antialiased pb-20">
 
-    <div class="card">
-        <h3>Precio actual del corte ($)</h3>
-        <input type="number" id="input-precio">
-        <button onclick="guardarPrecio()" style="background-color: #5856d6;">Actualizar Precio</button>
-    </div>
+    <!-- Header / Fecha Actual -->
+    <header class="bg-indigo-600 text-white p-4 shadow-md sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold"><i class="fa-solid fa-scissors mr-2"></i>ALEXSTYLE</h1>
+            <div id="fecha-actual" class="text-sm bg-indigo-700 px-3 py-1 rounded-full"></div>
+        </div>
+    </header>
 
-    <div class="card">
-        <h3>Nuevo Turno</h3>
-        <input type="text" id="nombre" placeholder="Nombre del cliente">
-        <input type="date" id="fecha" onchange="actualizarHorarios()">
-        <select id="hora"><option>Selecciona fecha primero</option></select>
-        <button onclick="guardarTurno()">Reservar</button>
-    </div>
-
-    <div class="card">
-        <h3>Pendientes de Pago (Fiados)</h3>
-        <input type="text" id="nombre-fiado" placeholder="Nombre del cliente">
-        <input type="number" id="monto-fiado" placeholder="Monto adeudado ($)">
-        <button onclick="agregarFiado()" style="background-color: #FF9500;">Agregar a Pendientes</button>
-        <div id="contenedor-pendientes"></div>
-    </div>
-
-    <div class="card-blue">
-        <h3>Recaudación Semanal</h3>
-        <p id="total-recaudado" style="font-size: 1.25rem; font-weight: bold; margin: 0;">$0</p>
-    </div>
-
-    <div class="card">
-        <h3>Próximos Turnos</h3>
-        <div id="contenedor-proximos"></div>
-        <hr style="border: 0; border-top: 1px solid #3a3a3c; margin: 15px 0;">
-        <h3 style="font-size: 0.9rem; color: #8e8e93;">Historial</h3>
-        <div id="contenedor-historial"></div>
-    </div>
-
-    <script>
-        // Carga el precio guardado o usa 15000 por defecto
-        let PRECIO_CORTE = parseInt(localStorage.getItem('precio_corte')) || 15000;
+    <!-- Contenido Principal -->
+    <main class="max-w-4xl mx-auto p-4">
         
-        // Al cargar la página, pone el precio actual en el input
-        document.getElementById('input-precio').value = PRECIO_CORTE;
+        <!-- PESTAÑA 1: TURNOS / AGENDA -->
+        <section id="tab-hoy" class="tab-content">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3 bg-white p-4 rounded-xl shadow-sm">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800">Agenda de Turnos</h2>
+                    <p class="text-xs text-gray-500">Selecciona una fecha para ver o administrar los turnos.</p>
+                </div>
+                <div class="flex items-center gap-2 w-full md:w-auto justify-between">
+                    <input type="date" id="filtro-fecha" onchange="cambiarFechaFiltro()" class="border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500">
+                    <button onclick="abrirModalTurno()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow font-medium text-sm whitespace-nowrap">
+                        <i class="fa-solid fa-plus mr-1"></i> Nuevo Turno
+                    </button>
+                </div>
+            </div>
+            
+            <div id="lista-clientes-hoy" class="space-y-4">
+                <!-- Se inyecta dinámicamente con JS -->
+            </div>
+        </section>
 
-        const todosLosHorarios = ["10:20", "11:00", "11:40", "12:20", "13:00", "14:40", "15:20", "16:00", "16:40", "17:20", "18:00", "18:40", "19:20", "20:00", "20:40", "21:20", "22:00"];
-        
-        let turnos = JSON.parse(localStorage.getItem('turnos_iphone')) || [];
-        let fiados = JSON.parse(localStorage.getItem('fiados_iphone')) || [];
+        <!-- PESTAÑA 2: SERVICIOS -->
+        <section id="tab-servicios" class="tab-content hidden">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-gray-800">Gestión de Servicios</h2>
+                <button onclick="abrirModalServicio()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow font-medium text-sm">
+                    <i class="fa-solid fa-plus mr-1"></i> Agregar Servicio
+                </button>
+            </div>
+            <div id="lista-servicios-cat" class="space-y-6">
+                <!-- Se inyecta dinámicamente -->
+            </div>
+        </section>
 
-        function guardarPrecio() {
-            const nuevoPrecio = document.getElementById('input-precio').value;
-            if (nuevoPrecio > 0) {
-                localStorage.setItem('precio_corte', nuevoPrecio);
-                PRECIO_CORTE = parseInt(nuevoPrecio);
-                alert("Precio fijado en: $" + PRECIO_CORTE);
-                renderizar();
-            }
-        }
+        <!-- PESTAÑA 3: FIADOS -->
+        <section id="tab-fiados" class="tab-content hidden">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3 bg-white p-4 rounded-xl shadow-sm">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800">Cuentas Corrientes (Fiados)</h2>
+                    <p class="text-xs text-gray-500">Historial detallado y pagos parciales.</p>
+                </div>
+                <div class="w-full md:w-72">
+                    <input type="text" id="buscador-fiados" oninput="renderFiados()" placeholder="🔍 Buscar cliente..." class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-amber-500 uppercase">
+                </div>
+            </div>
+            <div id="lista-fiados" class="space-y-4">
+                <!-- Se inyecta dinámicamente -->
+            </div>
+        </section>
 
-        function renderizar() {
-            turnos.sort((a, b) => new Date(a.fecha + 'T' + a.hora) - new Date(b.fecha + 'T' + b.hora));
-            const hoy = new Date(); hoy.setHours(0,0,0,0);
-            const fechaHoyString = new Date().toISOString().split('T')[0];
-            const proximos = document.getElementById('contenedor-proximos');
-            const historial = document.getElementById('contenedor-historial');
-            proximos.innerHTML = ''; historial.innerHTML = '';
+    </main>
 
-            turnos.forEach(t => {
-                const esPasado = new Date(t.fecha + 'T00:00:00') < hoy;
-                const html = `<div class="turno-row ${t.fecha === fechaHoyString ? 'turno-hoy' : ''}">
-                    <div><strong>${t.nombre}</strong><br><span class="${esPasado ? 'historial' : ''}">${t.fecha} • ${t.hora} hs</span></div>
-                    ${!esPasado ? `<button class="btn-delete" onclick="eliminarTurno(${t.id})">Anular</button>` : ''}
-                </div>`;
-                esPasado ? historial.innerHTML += html : proximos.innerHTML += html;
-            });
+    <!-- Barra de Navegación Inferior -->
+    <nav class="bg-white border-t border-gray-200 fixed bottom-0 left-0 right-0 shadow-lg">
+        <div class="max-w-4xl mx-auto flex justify-around py-3">
+            <button onclick="cambiarTab('hoy')" id="btn-tab-hoy" class="flex flex-col items-center text-indigo-600 font-semibold text-xs">
+                <i class="fa-solid fa-calendar-day text-xl mb-1"></i> Agenda
+            </button>
+            <button onclick="cambiarTab('servicios')" id="btn-tab-servicios" class="flex flex-col items-center text-gray-400 font-semibold text-xs">
+                <i class="fa-solid fa-list-check text-xl mb-1"></i> Servicios
+            </button>
+            <button onclick="cambiarTab('fiados')" id="btn-tab-fiados" class="flex flex-col items-center text-gray-400 font-semibold text-xs">
+                <i class="fa-solid fa-book-open text-xl mb-1"></i> Fiados
+            </button>
+        </div>
+    </nav>
 
-            const contFiados = document.getElementById('contenedor-pendientes');
-            contFiados.innerHTML = '';
-            fiados.forEach(f => {
-                contFiados.innerHTML += `<div class="turno-row">
-                    <div><strong>${f.nombre}</strong><br><small style="color:#FF9500;">Debe: $${f.monto}</small></div>
-                    <div>
-                        <button class="btn-pay" onclick="pagarFiado(${f.id})">Pagado</button>
-                        <button class="btn-delete" onclick="eliminarFiado(${f.id})">Eliminar</button>
+    <!-- MODAL NUEVO TURNO / CLIENTE -->
+    <div id="modal-turno" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onclick="cerrarModalTurno()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="text-xl font-bold text-gray-800 mb-4"><i class="fa-solid fa-user-plus mr-2 text-indigo-600"></i>Nuevo Cliente / Turno</h3>
+            
+            <form id="form-turno" onsubmit="guardarTurno(event)">
+                <div class="mb-3">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">👤 Nombre del Cliente</label>
+                    <input type="text" id="input-nombre" required class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 uppercase" placeholder="Ej: FER">
+                </div>
+                
+                <div class="mb-3">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">📅 Fecha del Turno</label>
+                    <input type="date" id="input-fecha" required onchange="actualizarHorariosDisponibles()" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500">
+                    <p class="text-xs text-gray-500 mt-1">Lunes a Jueves con horario. Viernes y Sábados por orden de llegada.</p>
+                </div>
+
+                <div class="mb-3">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">⏰ Horario (Cada 40 min)</label>
+                    <select id="input-hora" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500">
+                        <option value="">-- Seleccionar hora --</option>
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">🛠️ Seleccionar Servicio</label>
+                    <div id="selector-servicios-turno" class="space-y-2 border border-gray-200 p-3 rounded-lg max-h-40 overflow-y-auto">
+                        <!-- Dinámico -->
                     </div>
-                </div>`;
+                </div>
+
+                <div class="bg-gray-50 p-3 rounded-lg mb-4 flex justify-between items-center">
+                    <span class="font-bold text-gray-700">Total Seleccionado:</span>
+                    <span id="modal-total-estimado" class="font-bold text-indigo-600 text-lg">$0</span>
+                </div>
+
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg font-semibold shadow">Crear Turno</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL NUEVO SERVICIO -->
+    <div id="modal-servicio" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-xl max-w-sm w-full p-6 shadow-2xl relative">
+            <button onclick="cerrarModalServicio()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="text-xl font-bold text-gray-800 mb-4">Agregar Nuevo Servicio</h3>
+            <form onsubmit="guardarNuevoServicio(event)">
+                <div class="mb-3">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+                    <select id="serv-cat" class="w-full border border-gray-300 rounded-lg p-2" required>
+                        <option value="CABELLO">Cabello</option>
+                        <option value="COLOR">Color</option>
+                        <option value="BARBA">Barba</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Servicio</label>
+                    <input type="text" id="serv-nombre" class="w-full border border-gray-300 rounded-lg p-2" required placeholder="Ej: Corte Degradé">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Precio ($)</label>
+                    <input type="number" id="serv-precio" class="w-full border border-gray-300 rounded-lg p-2" required placeholder="15000">
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 text-white py-2 rounded-lg font-semibold">Guardar Servicio</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Script de Lógica -->
+    <script>
+        const fechaHoyObj = new Date();
+        const opcionesFecha = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('fecha-actual').innerText = fechaHoyObj.toLocaleDateString('es-ES', opcionesFecha);
+
+        const fechaHoyStr = fechaHoyObj.toISOString().split('T')[0];
+        document.getElementById('filtro-fecha').value = fechaHoyStr;
+
+        let servicios = JSON.parse(localStorage.getItem('servicios')) || [
+            { id: 1, categoria: 'CABELLO', nombre: 'CORTE DE PELO', precio: 15000 },
+            { id: 2, categoria: 'COLOR', nombre: 'TINTURA COMPLETA', precio: 25000 },
+            { id: 3, categoria: 'BARBA', nombre: 'CORTE Y DISEÑO DE BARBA', precio: 8000 }
+        ];
+
+        let turnos = JSON.parse(localStorage.getItem('turnos')) || [
+            { id: 101, nombre: 'FRAN', fecha: fechaHoyStr, hora: '10:20', items: [{ nombre: 'CORTE DE PELO', precio: 15000 }], total: 15000, estado: 'pendiente' }
+        ];
+
+        let fiados = JSON.parse(localStorage.getItem('fiados')) || [];
+        let servicioSeleccionado = null;
+
+        const listaHorariosBase = [
+            '10:20', '11:00', '11:40', '12:20', '13:00', '13:40', 
+            '14:20', '15:00', '15:40', '16:20', '17:00', '17:40', 
+            '18:20', '19:00', '19:40', '20:20', '21:00', '21:40'
+        ];
+
+        function cambiarTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tab}`).classList.remove('hidden');
+
+            ['hoy', 'servicios', 'fiados'].forEach(t => {
+                const btn = document.getElementById(`btn-tab-${t}`);
+                if (t === tab) {
+                    btn.classList.remove('text-gray-400');
+                    btn.classList.add('text-indigo-600');
+                } else {
+                    btn.classList.remove('text-indigo-600');
+                    btn.classList.add('text-gray-400');
+                }
             });
 
-            calcularRecaudacion();
+            if(tab === 'hoy') renderTurnosFecha();
+            if(tab === 'servicios') renderServicios();
+            if(tab === 'fiados') renderFiados();
         }
 
-        function agregarFiado() {
-            const nombre = document.getElementById('nombre-fiado').value;
-            const monto = document.getElementById('monto-fiado').value;
-            if (!nombre || !monto) return alert("Completa nombre y monto");
-            fiados.push({ id: Date.now(), nombre, monto });
-            localStorage.setItem('fiados_iphone', JSON.stringify(fiados));
-            document.getElementById('nombre-fiado').value = '';
-            document.getElementById('monto-fiado').value = '';
-            renderizar();
+        function cambiarFechaFiltro() {
+            renderTurnosFecha();
         }
 
-        function pagarFiado(id) {
-            const fiado = fiados.find(f => f.id === id);
-            if (confirm(`¿Confirmar que ${fiado.nombre} pagó $${fiado.monto}?`)) {
+        function renderTurnosFecha() {
+            const contenedor = document.getElementById('lista-clientes-hoy');
+            contenedor.innerHTML = '';
+            
+            const fechaSeleccionada = document.getElementById('filtro-fecha').value;
+            const turnosFiltrados = turnos.filter(t => t.fecha === fechaSeleccionada && t.estado === 'pendiente');
+
+            if (turnosFiltrados.length === 0) {
+                contenedor.innerHTML = `<div class="text-center py-10 text-gray-400 bg-white rounded-xl shadow-sm p-6"><i class="fa-solid fa-mug-hot text-4xl mb-2"></i><p>No hay turnos agendados para esta fecha.</p></div>`;
+                return;
+            }
+
+            turnosFiltrados.forEach(t => {
+                let itemsHtml = t.items.map(i => `
+                    <div class="flex justify-between text-sm py-1 border-b border-gray-100">
+                        <span>• ${i.nombre}</span>
+                        <span class="font-medium">$${i.precio}</span>
+                    </div>
+                `).join('');
+
+                contenedor.innerHTML += `
+                    <div class="bg-white rounded-xl shadow-md p-5 border-l-4 border-indigo-500">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-bold bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-md">
+                                <i class="fa-regular fa-clock mr-1"></i> ${t.hora || 'Orden de llegada'}
+                            </span>
+                            <span class="text-base font-bold text-gray-800">
+                                <i class="fa-solid fa-user mr-1 text-gray-500"></i> ${t.nombre}
+                            </span>
+                        </div>
+                        <div class="my-3">${itemsHtml}</div>
+                        <div class="flex flex-wrap justify-between items-center mt-3 pt-2 border-t border-gray-200 gap-2">
+                            <span class="font-bold text-gray-700">Total: $${t.total}</span>
+                            <div class="flex flex-wrap gap-1">
+                                <button onclick="cobrar(${t.id}, 'EFECTIVO')" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs px-2.5 py-1.5 rounded font-medium">Efectivo</button>
+                                <button onclick="cobrar(${t.id}, 'TRANSFERENCIA')" class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-2.5 py-1.5 rounded font-medium">Transferencia</button>
+                                <button onclick="cobrar(${t.id}, 'FIADO')" class="bg-amber-500 hover:bg-amber-600 text-white text-xs px-2.5 py-1.5 rounded font-medium">Fiado</button>
+                                <button onclick="cancelarTurno(${t.id})" class="bg-red-500 hover:bg-red-600 text-white text-xs px-2.5 py-1.5 rounded font-medium" title="Cancelar Turno"><i class="fa-solid fa-ban"></i></button>
+                                <button onclick="compartirWhatsApp(${t.id})" class="bg-emerald-700 hover:bg-emerald-800 text-white text-xs px-2.5 py-1.5 rounded"><i class="fa-brands fa-whatsapp"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function cancelarTurno(id) {
+            if(confirm('¿Estás seguro de cancelar este turno? El horario quedará libre nuevamente.')) {
+                let turno = turnos.find(t => t.id === id);
+                if(turno) {
+                    turno.estado = 'cancelado';
+                    localStorage.setItem('turnos', JSON.stringify(turnos));
+                    renderTurnosFecha();
+                    alert('Turno cancelado con éxito. Horario liberado.');
+                }
+            }
+        }
+
+        function cobrar(id, metodo) {
+            let turno = turnos.find(t => t.id === id);
+            if(!turno) return;
+
+            let mensajeConfirmacion = `¿Confirmas el cobro de $${turno.total} a ${turno.nombre} mediante ${metodo}?`;
+            if (metodo === 'FIADO') {
+                mensajeConfirmacion = `¿Confirmas registrar como FIADO el monto de $${turno.total} para ${turno.nombre}?`;
+            }
+
+            if (!confirm(mensajeConfirmacion)) {
+                return;
+            }
+
+            turno.estado = 'completado';
+
+            if (metodo === 'FIADO') {
+                let clienteFiado = fiados.find(f => f.nombre.toUpperCase() === turno.nombre.toUpperCase());
+                let nuevoDetalle = { id: Date.now(), fecha: turno.fecha, hora: turno.hora || 'Sin hora', items: turno.items, total: turno.total };
+                
+                if(clienteFiado) {
+                    clienteFiado.total += turno.total;
+                    clienteFiado.detalle.push(nuevoDetalle);
+                } else {
+                    fiados.push({
+                        id: Date.now(),
+                        nombre: turno.nombre,
+                        total: turno.total,
+                        detalle: [nuevoDetalle]
+                    });
+                }
+                localStorage.setItem('fiados', JSON.stringify(fiados));
+                alert(`¡Registrado como FIADO para ${turno.nombre}!`);
+            } else {
+                alert(`¡Cobro de $${turno.total} realizado con éxito vía ${metodo}!`);
+            }
+
+            localStorage.setItem('turnos', JSON.stringify(turnos));
+            renderTurnosFecha();
+        }
+
+        function compartirWhatsApp(id) {
+            let turno = turnos.find(t => t.id === id);
+            if(!turno) return;
+
+            let detalleTexto = turno.items.map(i => `- ${i.nombre}: $${i.precio}`).join('%0A');
+            let mensaje = `Hola *${turno.nombre}*! Este es el detalle de tu servicio en *ALEXSTYLE*:%0A${detalleTexto}%0A*Total a Pagar: $${turno.total}*%0A¡Gracias por tu visita!`;
+            
+            window.open(`https://api.whatsapp.com/send?text=${mensaje}`, '_blank');
+        }
+
+        function abrirModalTurno() {
+            const fechaSeleccionada = document.getElementById('filtro-fecha').value;
+            document.getElementById('input-fecha').value = fechaSeleccionada || fechaHoyStr;
+            document.getElementById('input-nombre').value = '';
+            servicioSeleccionado = null;
+            document.getElementById('modal-total-estimado').innerText = '$0';
+            
+            actualizarHorariosDisponibles();
+            renderSelectorServicios();
+
+            document.getElementById('modal-turno').classList.remove('hidden');
+        }
+
+        function renderSelectorServicios() {
+            const contenedor = document.getElementById('selector-servicios-turno');
+            contenedor.innerHTML = '';
+            
+            servicios.forEach((s) => {
+                let isSelected = servicioSeleccionado && servicioSeleccionado.id === s.id;
+                contenedor.innerHTML += `
+                    <div onclick='seleccionarServicio(${JSON.stringify(s)})' class="cursor-pointer p-2.5 rounded-lg border transition flex justify-between items-center ${isSelected ? 'border-indigo-600 bg-indigo-50 font-semibold' : 'border-gray-200 hover:bg-gray-50'}">
+                        <span>${s.nombre}</span>
+                        <span class="text-indigo-600">$${s.precio}</span>
+                    </div>
+                `;
+            });
+        }
+
+        function seleccionarServicio(servicio) {
+            servicioSeleccionado = servicio;
+            document.getElementById('modal-total-estimado').innerText = `$${servicio.precio}`;
+            renderSelectorServicios();
+        }
+
+        function actualizarHorariosDisponibles() {
+            const fechaSeleccionada = document.getElementById('input-fecha').value;
+            const selectHora = document.getElementById('input-hora');
+            
+            const horariosOcupados = turnos
+                .filter(t => t.fecha === fechaSeleccionada && t.estado !== 'cancelado')
+                .map(t => t.hora);
+
+            selectHora.innerHTML = '<option value="">-- Seleccionar hora --</option>';
+            listaHorariosBase.forEach(hora => {
+                if (!horariosOcupados.includes(hora)) {
+                    selectHora.innerHTML += `<option value="${hora}">${hora}</option>`;
+                }
+            });
+        }
+
+        function cerrarModalTurno() {
+            document.getElementById('modal-turno').classList.add('hidden');
+        }
+
+        function guardarTurno(e) {
+            e.preventDefault();
+            let nombre = document.getElementById('input-nombre').value.toUpperCase();
+            let fecha = document.getElementById('input-fecha').value;
+            let hora = document.getElementById('input-hora').value;
+
+            if(!servicioSeleccionado) {
+                alert('Debes seleccionar un servicio.');
+                return;
+            }
+
+            turnos.push({
+                id: Date.now(),
+                nombre,
+                fecha,
+                hora,
+                items: [{ nombre: servicioSeleccionado.nombre, precio: servicioSeleccionado.precio }],
+                total: servicioSeleccionado.precio,
+                estado: 'pendiente'
+            });
+
+            localStorage.setItem('turnos', JSON.stringify(turnos));
+            cerrarModalTurno();
+            
+            document.getElementById('filtro-fecha').value = fecha;
+            renderTurnosFecha();
+        }
+
+        function renderServicios() {
+            const contenedor = document.getElementById('lista-servicios-cat');
+            contenedor.innerHTML = '';
+
+            let categorias = ['CABELLO', 'COLOR', 'BARBA'];
+            
+            categorias.forEach(cat => {
+                let serviciosCat = servicios.filter(s => s.categoria === cat);
+                let htmlItems = serviciosCat.length > 0 ? serviciosCat.map(s => `
+                    <div class="flex justify-between items-center bg-white p-3 rounded-lg shadow-sm mb-2">
+                        <span class="text-gray-700 font-medium">${s.nombre}</span>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-indigo-600 font-bold">$${s.precio}</span>
+                            <button onclick="eliminarServicio(${s.id})" class="text-red-400 hover:text-red-600"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                `).join('') : `<p class="text-sm text-gray-400 italic">No hay servicios en esta categoría.</p>`;
+
+                contenedor.innerHTML += `
+                    <div>
+                        <h3 class="text-md font-bold text-gray-600 uppercase mb-2 border-b pb-1">${cat}</h3>
+                        ${htmlItems}
+                    </div>
+                `;
+            });
+        }
+
+        function abrirModalServicio() { document.getElementById('modal-servicio').classList.remove('hidden'); }
+        function cerrarModalServicio() { document.getElementById('modal-servicio').classList.add('hidden'); }
+
+        function guardarNuevoServicio(e) {
+            e.preventDefault();
+            let categoria = document.getElementById('serv-cat').value;
+            let nombre = document.getElementById('serv-nombre').value.toUpperCase();
+            let precio = parseFloat(document.getElementById('serv-precio').value);
+
+            servicios.push({ id: Date.now(), categoria, nombre, precio });
+            localStorage.setItem('servicios', JSON.stringify(servicios));
+            cerrarModalServicio();
+            renderServicios();
+            document.getElementById('form-servicio').reset();
+        }
+
+        function eliminarServicio(id) {
+            servicios = servicios.filter(s => s.id !== id);
+            localStorage.setItem('servicios', JSON.stringify(servicios));
+            renderServicios();
+        }
+
+        function renderFiados() {
+            const contenedor = document.getElementById('lista-fiados');
+            contenedor.innerHTML = '';
+
+            const busqueda = document.getElementById('buscador-fiados').value.toUpperCase();
+            const fiadosFiltrados = fiados.filter(f => f.nombre.includes(busqueda));
+
+            if(fiadosFiltrados.length === 0) {
+                contenedor.innerHTML = `<div class="text-center py-10 text-gray-400 bg-white rounded-xl shadow-sm p-6"><i class="fa-solid fa-circle-check text-4xl mb-2 text-emerald-500"></i><p>No se encontraron cuentas corrientes pendientes.</p></div>`;
+                return;
+            }
+
+            fiadosFiltrados.forEach(f => {
+                let detalleHtml = f.detalle.map(d => {
+                    let itemsNombres = d.items.map(i => i.nombre).join(', ');
+                    return `
+                        <div class="flex justify-between items-center text-xs py-2 border-b border-gray-100">
+                            <div>
+                                <span class="font-semibold text-gray-700">${d.fecha} (${d.hora})</span>
+                                <p class="text-gray-500">${itemsNombres}</p>
+                            </div>
+                            <span class="font-bold text-gray-800">$${d.total}</span>
+                        </div>
+                    `;
+                }).join('');
+
+                contenedor.innerHTML += `
+                    <div class="bg-white rounded-xl shadow-md p-4 border-l-4 border-amber-500">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-bold text-gray-800 text-lg"><i class="fa-solid fa-user-tag mr-2 text-amber-500"></i>${f.nombre}</span>
+                            <span class="text-lg font-bold text-red-600">Deuda: $${f.total}</span>
+                        </div>
+                        
+                        <!-- Historial desplegable -->
+                        <details class="group my-2 bg-gray-50 p-2.5 rounded-lg border border-gray-200">
+                            <summary class="cursor-pointer text-xs font-semibold text-indigo-600 flex justify-between items-center">
+                                <span>Ver detalle de servicios (${f.detalle.length})</span>
+                                <i class="fa-solid fa-chevron-down group-open:rotate-180 transition-transform"></i>
+                            </summary>
+                            <div class="mt-2 pt-2 border-t border-gray-200 space-y-1">
+                                ${detalleHtml}
+                            </div>
+                        </details>
+
+                        <div class="flex flex-wrap justify-end gap-2 mt-3 pt-2 border-t border-gray-100">
+                            <button onclick="enviarWhatsAppFiado(${f.id})" class="bg-emerald-700 hover:bg-emerald-800 text-white text-xs px-3 py-1.5 rounded font-medium"><i class="fa-brands fa-whatsapp mr-1"></i> Cobrar por WhatsApp</button>
+                            <button onclick="pagoParcial(${f.id})" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded font-medium">Abonar Parcial</button>
+                            <button onclick="saldarFiado(${f.id})" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3 py-1.5 rounded font-semibold">Saldar Total</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function pagoParcial(id) {
+            let cliente = fiados.find(f => f.id === id);
+            if(!cliente) return;
+
+            let montoStr = prompt(`Deuda actual de ${cliente.nombre}: $${cliente.total}\n\nIngresa el monto que el cliente está abonando ahora:`);
+            if(!montoStr) return;
+
+            let montoAbonado = parseFloat(montoStr);
+            if(isNaN(montoAbonado) || montoAbonado <= 0) {
+                alert('Por favor ingresa un monto válido.');
+                return;
+            }
+
+            if(montoAbonado >= cliente.total) {
+                if(confirm(`El monto ingresado cubre o supera la deuda total. ¿Deseas saldar la cuenta por completo?`)) {
+                    saldarFiado(id);
+                }
+                return;
+            }
+
+            cliente.total -= montoAbonado;
+            cliente.detalle.push({
+                id: Date.now(),
+                fecha: new Date().toISOString().split('T')[0],
+                hora: 'Pago parcial',
+                items: [{ nombre: `ENTREGA / PAGO PARCIAL`, precio: -montoAbonado }],
+                total: -montoAbonado
+            });
+
+            localStorage.setItem('fiados', JSON.stringify(fiados));
+            renderFiados();
+            alert(`¡Pago parcial de $${montoAbonado} registrado con éxito! Nuevo saldo pendiente: $${cliente.total}`);
+        }
+
+        function enviarWhatsAppFiado(id) {
+            let cliente = fiados.find(f => f.id === id);
+            if(!cliente) return;
+
+            let mensaje = `Hola *${cliente.nombre}*! Te escribimos de *ALEXSTYLE* para recordarte que tienes un saldo pendiente en tu cuenta corriente por un total de *\$${cliente.total}*. ¡Muchas gracias!`;
+            window.open(`https://api.whatsapp.com/send?text=${mensaje}`, '_blank');
+        }
+
+        function saldarFiado(id) {
+            let cliente = fiados.find(f => f.id === id);
+            if(confirm(`¿Estás seguro de que ${cliente.nombre} ha saldado su cuenta completa de $${cliente.total}?`)) {
                 fiados = fiados.filter(f => f.id !== id);
-                localStorage.setItem('fiados_iphone', JSON.stringify(fiados));
-                renderizar();
+                localStorage.setItem('fiados', JSON.stringify(fiados));
+                renderFiados();
+                alert('¡Cuenta corriente saldada con éxito!');
             }
         }
 
-        function eliminarFiado(id) {
-            const fiado = fiados.find(f => f.id === id);
-            if (confirm(`¿Eliminar pendiente de ${fiado.nombre}?`)) {
-                fiados = fiados.filter(f => f.id !== id);
-                localStorage.setItem('fiados_iphone', JSON.stringify(fiados));
-                renderizar();
-            }
-        }
-
-        function guardarTurno() {
-            const nombre = document.getElementById('nombre').value;
-            const fecha = document.getElementById('fecha').value;
-            const hora = document.getElementById('hora').value;
-            if (!nombre || !fecha || !hora) return alert("Completa todos los campos");
-            turnos.push({ id: Date.now(), nombre, fecha, hora });
-            localStorage.setItem('turnos_iphone', JSON.stringify(turnos));
-            document.getElementById('nombre').value = '';
-            actualizarHorarios();
-            renderizar();
-        }
-
-        function eliminarTurno(id) {
-            const turnoAEliminar = turnos.find(t => t.id === id);
-            if (confirm(`¿Anular turno de ${turnoAEliminar.nombre}?`)) {
-                turnos = turnos.filter(t => t.id !== id);
-                localStorage.setItem('turnos_iphone', JSON.stringify(turnos));
-                actualizarHorarios();
-                renderizar();
-            }
-        }
-
-        function actualizarHorarios() {
-            const fecha = document.getElementById('fecha').value;
-            const select = document.getElementById('hora');
-            const ocupados = turnos.filter(t => t.fecha === fecha).map(t => t.hora);
-            select.innerHTML = '<option value="">Selecciona hora</option>';
-            todosLosHorarios.forEach(h => { if (!ocupados.includes(h)) select.innerHTML += `<option value="${h}">${h}</option>`; });
-        }
-
-        function calcularRecaudacion() {
-            const haceUnaSemana = new Date(); haceUnaSemana.setDate(haceUnaSemana.getDate() - 7);
-            const total = turnos.filter(t => new Date(t.fecha + 'T00:00:00') >= haceUnaSemana).length * PRECIO_CORTE;
-            document.getElementById('total-recaudado').innerText = '$' + total.toLocaleString('es-AR');
-        }
-
-        renderizar();
+        renderTurnosFecha();
     </script>
 </body>
 </html>
