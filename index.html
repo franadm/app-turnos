@@ -502,8 +502,12 @@
             let turno = turnos.find(t => t.id === id);
             if(!turno) return;
 
+            // Formatear la fecha (ej: 2026-09-01 a 01/09/2026)
+            let [anio, mes, dia] = turno.fecha.split('-');
+            let fechaFormateada = `${dia}/${mes}/${anio}`;
+
             let detalleTexto = turno.items.map(i => `- ${i.nombre}: $${i.precio}`).join('%0A');
-            let mensaje = `Hola *${turno.nombre}*! Este es el detalle de tu servicio en *ALEXSTYLE*:%0A${detalleTexto}%0A*Total a Pagar: $${turno.total}*%0A¡Gracias por tu visita!`;
+            let mensaje = `Hola *${turno.nombre}*! Te recordamos los datos de tu turno en *ALEXSTYLE*:%0A📅 *Fecha:* ${fechaFormateada}%0A⏰ *Hora:* ${turno.hora || 'Orden de llegada'}%0A%0A*Detalle:*%0A${detalleTexto}%0A*Total a Pagar: $${turno.total}*%0A¡Te esperamos!`;
             
             window.open(`https://api.whatsapp.com/send?text=${mensaje}`, '_blank');
         }
