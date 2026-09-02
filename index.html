@@ -17,16 +17,16 @@
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100 font-sans antialiased pb-20 transition-colors duration-200">
 
     <!-- Header / Fecha Actual -->
-    <header class="bg-indigo-600 dark:bg-indigo-900 text-white p-4 shadow-md sticky top-0 z-40 transition-colors duration-200">
+    <header class="bg-red-600 dark:bg-red-950 text-white p-4 shadow-md sticky top-0 z-40 transition-colors duration-200">
         <div class="max-w-4xl mx-auto flex justify-between items-center">
             <h1 class="text-xl font-bold flex items-center gap-2">
                 <img src="ALEXSTYLE.JPG.jpeg" alt="Logo ALEXSTYLE" class="h-11 w-auto object-contain">
                 ALEXSTYLE
             </h1>
             <div class="flex items-center gap-3">
-                <div id="fecha-actual" class="text-xs md:text-sm bg-indigo-700 dark:bg-indigo-950 px-3 py-1 rounded-full hidden sm:block"></div>
+                <div id="fecha-actual" class="text-xs md:text-sm bg-red-700 dark:bg-red-900 px-3 py-1 rounded-full hidden sm:block"></div>
                 <!-- Botón Tuerca Ajustes -->
-                <button onclick="toggleMenuAjustes()" class="bg-indigo-700 dark:bg-indigo-950 hover:bg-indigo-800 px-3 py-1.5 rounded-lg text-sm transition">
+                <button onclick="toggleMenuAjustes()" class="bg-red-700 dark:bg-red-900 hover:bg-red-800 px-3 py-1.5 rounded-lg text-sm transition">
                     <i class="fa-solid fa-gear"></i>
                 </button>
             </div>
@@ -36,23 +36,23 @@
     <!-- MENÚ FLOTANTE DE AJUSTES (TUERCA) -->
     <div id="menu-ajustes" class="hidden fixed top-16 right-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-2xl rounded-xl p-4 w-72 md:w-80 z-50 transition-colors duration-200">
         <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-100 dark:border-gray-700">
-            <span class="font-bold text-sm text-gray-700 dark:text-gray-200"><i class="fa-solid fa-sliders mr-1 text-indigo-600"></i> Ajustes y Caja</span>
+            <span class="font-bold text-sm text-gray-700 dark:text-gray-200"><i class="fa-solid fa-sliders mr-1 text-red-600"></i> Ajustes y Caja</span>
             <button onclick="toggleMenuAjustes()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"><i class="fa-solid fa-xmark"></i></button>
         </div>
         
         <div class="space-y-4">
             <!-- Selector Tema Día/Noche -->
             <div class="flex justify-between items-center">
-                <span class="text-sm"><i class="fa-solid fa-moon mr-2 text-indigo-500"></i> Modo Noche</span>
+                <span class="text-sm"><i class="fa-solid fa-moon mr-2 text-red-500"></i> Modo Noche</span>
                 <label class="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" id="check-modo-oscuro" onchange="cambiarTema()" class="sr-only peer">
-                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
                 </label>
             </div>
 
             <!-- APARTADO DE CAJA / INGRESOS REALES -->
             <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
-                <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wide block mb-2">
+                <span class="text-xs font-bold text-red-600 dark:text-red-400 uppercase tracking-wide block mb-2">
                     <i class="fa-solid fa-wallet mr-1"></i> Caja Real (Sin Fiados)
                 </span>
                 <div class="space-y-2 text-sm">
@@ -62,7 +62,7 @@
                     </div>
                     <div class="flex justify-between items-center bg-white dark:bg-gray-800 p-2 rounded-lg shadow-sm">
                         <span class="text-gray-500 dark:text-gray-400 text-xs">Esta Semana:</span>
-                        <span id="caja-semana" class="font-bold text-indigo-600 dark:text-indigo-400">$0</span>
+                        <span id="caja-semana" class="font-bold text-red-600 dark:text-red-400">$0</span>
                     </div>
                     <div class="flex justify-between items-center bg-white dark:bg-gray-800 p-2 rounded-lg shadow-sm">
                         <span class="text-gray-500 dark:text-gray-400 text-xs">Este Mes:</span>
@@ -73,10 +73,10 @@
 
             <!-- ACCIONES DE RESPALDO (BACKUP) -->
             <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-xl border border-gray-100 dark:border-gray-700 space-y-2">
-                <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wide block mb-1">
+                <span class="text-xs font-bold text-red-600 dark:text-red-400 uppercase tracking-wide block mb-1">
                     <i class="fa-solid fa-database mr-1"></i> Copia de Seguridad
                 </span>
-                <button onclick="exportarBackup()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs py-2 px-3 rounded-lg font-medium transition flex items-center justify-center gap-2">
+                <button onclick="exportarBackup()" class="w-full bg-red-600 hover:bg-red-700 text-white text-xs py-2 px-3 rounded-lg font-medium transition flex items-center justify-center gap-2">
                     <i class="fa-solid fa-download"></i> Exportar Backup
                 </button>
                 <button onclick="document.getElementById('input-importar-backup').click()" class="w-full bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-50 text-gray-800 dark:text-gray-100 text-xs py-2 px-3 rounded-lg font-medium transition flex items-center justify-center gap-2">
@@ -87,7 +87,7 @@
 
             <!-- Acceso directo a Servicios -->
             <button onclick="cambiarTab('servicios'); toggleMenuAjustes();" class="w-full text-left text-sm py-2 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition flex items-center">
-                <i class="fa-solid fa-list-check mr-2 text-indigo-500"></i> Gestionar Servicios
+                <i class="fa-solid fa-list-check mr-2 text-red-500"></i> Gestionar Servicios
             </button>
         </div>
     </div>
@@ -103,8 +103,8 @@
                     <p class="text-xs text-gray-500 dark:text-gray-400">Selecciona una fecha para ver o administrar los turnos.</p>
                 </div>
                 <div class="flex items-center gap-2 w-full md:w-auto justify-between">
-                    <input type="date" id="filtro-fecha" onchange="cambiarFechaFiltro()" class="border border-gray-300 dark:border-gray-700 bg-transparent rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500">
-                    <button onclick="abrirModalTurno()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow font-medium text-sm whitespace-nowrap">
+                    <input type="date" id="filtro-fecha" onchange="cambiarFechaFiltro()" class="border border-gray-300 dark:border-gray-700 bg-transparent rounded-lg p-2 text-sm focus:ring-2 focus:ring-red-500">
+                    <button onclick="abrirModalTurno()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg shadow font-medium text-sm whitespace-nowrap">
                         <i class="fa-solid fa-plus mr-1"></i> Nuevo Turno
                     </button>
                 </div>
@@ -122,7 +122,7 @@
                     <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">Gestión de Servicios</h2>
                     <p class="text-xs text-gray-500 dark:text-gray-400">Agrega o elimina los precios y tipos de servicios.</p>
                 </div>
-                <button onclick="abrirModalServicio()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow font-medium text-sm whitespace-nowrap">
+                <button onclick="abrirModalServicio()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg shadow font-medium text-sm whitespace-nowrap">
                     <i class="fa-solid fa-plus mr-1"></i> Agregar Servicio
                 </button>
             </div>
@@ -152,7 +152,7 @@
     <!-- Barra de Navegación Inferior -->
     <nav class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 fixed bottom-0 left-0 right-0 shadow-lg transition-colors duration-200 z-30">
         <div class="max-w-4xl mx-auto flex justify-around py-3">
-            <button onclick="cambiarTab('hoy')" id="btn-tab-hoy" class="flex flex-col items-center text-indigo-600 dark:text-indigo-400 font-semibold text-xs">
+            <button onclick="cambiarTab('hoy')" id="btn-tab-hoy" class="flex flex-col items-center text-red-600 dark:text-red-400 font-semibold text-xs">
                 <i class="fa-solid fa-calendar-day text-xl mb-1"></i> Agenda
             </button>
             <button onclick="cambiarTab('fiados')" id="btn-tab-fiados" class="flex flex-col items-center text-gray-400 font-semibold text-xs">
@@ -165,23 +165,23 @@
     <div id="modal-turno" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 rounded-xl max-w-md w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto transition-colors duration-200">
             <button onclick="cerrarModalTurno()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xl"><i class="fa-solid fa-xmark"></i></button>
-            <h3 class="text-xl font-bold mb-4"><i class="fa-solid fa-user-plus mr-2 text-indigo-600"></i>Nuevo Cliente / Turno</h3>
+            <h3 class="text-xl font-bold mb-4"><i class="fa-solid fa-user-plus mr-2 text-red-600"></i>Nuevo Cliente / Turno</h3>
             
             <form id="form-turno" onsubmit="guardarTurno(event)">
                 <div class="mb-3">
                     <label class="block text-sm font-medium mb-1">👤 Nombre del Cliente</label>
-                    <input type="text" id="input-nombre" required class="w-full border border-gray-300 dark:border-gray-700 bg-transparent rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 uppercase" placeholder="Ej: FER">
+                    <input type="text" id="input-nombre" required class="w-full border border-gray-300 dark:border-gray-700 bg-transparent rounded-lg p-2 focus:ring-2 focus:ring-red-500 uppercase" placeholder="Ej: FER">
                 </div>
                 
                 <div class="mb-3">
                     <label class="block text-sm font-medium mb-1">📅 Fecha del Turno</label>
-                    <input type="date" id="input-fecha" required onchange="actualizarHorariosDisponibles()" class="w-full border border-gray-300 dark:border-gray-700 bg-transparent rounded-lg p-2 focus:ring-2 focus:ring-indigo-500">
+                    <input type="date" id="input-fecha" required onchange="actualizarHorariosDisponibles()" class="w-full border border-gray-300 dark:border-gray-700 bg-transparent rounded-lg p-2 focus:ring-2 focus:ring-red-500">
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Lunes a Jueves con horario. Viernes y Sábados por orden de llegada.</p>
                 </div>
 
                 <div class="mb-3">
                     <label class="block text-sm font-medium mb-1">⏰ Horario (Cada 40 min)</label>
-                    <select id="input-hora" class="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-700 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500">
+                    <select id="input-hora" class="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-700 rounded-lg p-2 focus:ring-2 focus:ring-red-500">
                         <option value="">-- Seleccionar hora --</option>
                     </select>
                 </div>
@@ -195,10 +195,10 @@
 
                 <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg mb-4 flex justify-between items-center">
                     <span class="font-bold">Total Seleccionado:</span>
-                    <span id="modal-total-estimado" class="font-bold text-indigo-600 dark:text-indigo-400 text-lg">$0</span>
+                    <span id="modal-total-estimado" class="font-bold text-red-600 dark:text-red-400 text-lg">$0</span>
                 </div>
 
-                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg font-semibold shadow">Crear Turno</button>
+                <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-semibold shadow">Crear Turno</button>
             </form>
         </div>
     </div>
@@ -225,7 +225,7 @@
                     <label class="block text-sm font-medium mb-1">Precio ($)</label>
                     <input type="number" id="serv-precio" class="w-full border border-gray-300 dark:border-gray-700 bg-transparent rounded-lg p-2" required placeholder="15000">
                 </div>
-                <button type="submit" class="w-full bg-indigo-600 text-white py-2 rounded-lg font-semibold">Guardar Servicio</button>
+                <button type="submit" class="w-full bg-red-600 text-white py-2 rounded-lg font-semibold">Guardar Servicio</button>
             </form>
         </div>
     </div>
@@ -343,9 +343,9 @@
                 if(btn) {
                     if (t === tab) {
                         btn.classList.remove('text-gray-400');
-                        btn.classList.add('text-indigo-600', 'dark:text-indigo-400');
+                        btn.classList.add('text-red-600', 'dark:text-red-400');
                     } else {
-                        btn.classList.remove('text-indigo-600', 'dark:text-indigo-400');
+                        btn.classList.remove('text-red-600', 'dark:text-red-400');
                         btn.classList.add('text-gray-400');
                     }
                 }
@@ -360,13 +360,35 @@
             renderTurnosFecha();
         }
 
+        function toggleMenuTurno(id) {
+            // Cierra todos los otros menús abiertos primero
+            document.querySelectorAll('[id^="menu-turno-"]').forEach(menu => {
+                if (menu.id !== `menu-turno-${id}`) {
+                    menu.classList.add('hidden');
+                }
+            });
+            // Alterna el menú seleccionado
+            const menu = document.getElementById(`menu-turno-${id}`);
+            if (menu) {
+                menu.classList.toggle('hidden');
+            }
+        }
+
+        // Cerrar menú de turnos si se hace clic fuera
+        window.addEventListener('click', function(e) {
+            if (!e.target.closest('.relative')) {
+                document.querySelectorAll('[id^="menu-turno-"]').forEach(menu => {
+                    menu.classList.add('hidden');
+                });
+            }
+        });
+
         function renderTurnosFecha() {
             const contenedor = document.getElementById('lista-clientes-hoy');
             contenedor.innerHTML = '';
             
             const fechaSeleccionada = document.getElementById('filtro-fecha').value;
             
-            // Filtramos y ordenamos cronológicamente por hora de menor a mayor
             const turnosFiltrados = turnos
                 .filter(t => t.fecha === fechaSeleccionada && t.estado === 'pendiente')
                 .sort((a, b) => {
@@ -389,9 +411,9 @@
                 `).join('');
 
                 contenedor.innerHTML += `
-                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-5 border-l-4 border-indigo-500 transition-colors duration-200">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-5 border-l-4 border-red-500 transition-colors duration-200">
                         <div class="flex justify-between items-center mb-2">
-                            <span class="text-sm font-bold bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 px-2.5 py-1 rounded-md">
+                            <span class="text-sm font-bold bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 px-2.5 py-1 rounded-md">
                                 <i class="fa-regular fa-clock mr-1"></i> ${t.hora || 'Orden de llegada'}
                             </span>
                             <span class="text-base font-bold text-gray-800 dark:text-gray-100">
@@ -399,14 +421,34 @@
                             </span>
                         </div>
                         <div class="my-3">${itemsHtml}</div>
-                        <div class="flex flex-wrap justify-between items-center mt-3 pt-2 border-t border-gray-200 dark:border-gray-700 gap-2">
+                        
+                        <div class="flex justify-between items-center mt-3 pt-2 border-t border-gray-200 dark:border-gray-700">
                             <span class="font-bold text-gray-700 dark:text-gray-300">Total: $${t.total}</span>
-                            <div class="flex flex-wrap gap-1">
-                                <button onclick="cobrar(${t.id}, 'EFECTIVO')" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs px-2.5 py-1.5 rounded font-medium">Efectivo</button>
-                                <button onclick="cobrar(${t.id}, 'TRANSFERENCIA')" class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-2.5 py-1.5 rounded font-medium">Transferencia</button>
-                                <button onclick="cobrar(${t.id}, 'FIADO')" class="bg-amber-500 hover:bg-amber-600 text-white text-xs px-2.5 py-1.5 rounded font-medium">Fiado</button>
-                                <button onclick="cancelarTurno(${t.id})" class="bg-red-500 hover:bg-red-600 text-white text-xs px-2.5 py-1.5 rounded font-medium" title="Cancelar Turno"><i class="fa-solid fa-ban"></i></button>
-                                <button onclick="compartirWhatsApp(${t.id})" class="bg-emerald-700 hover:bg-emerald-800 text-white text-xs px-2.5 py-1.5 rounded"><i class="fa-brands fa-whatsapp"></i></button>
+                            
+                            <!-- BOTÓN DE TRES PUNTOS Y MENÚ DESPLEGABLE -->
+                            <div class="relative">
+                                <button onclick="toggleMenuTurno(${t.id})" class="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 px-3 py-1.5 rounded-lg text-sm transition">
+                                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                                </button>
+                                
+                                <div id="menu-turno-${t.id}" class="hidden absolute right-0 bottom-full mb-2 w-48 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl shadow-xl z-20 overflow-hidden py-1">
+                                    <button onclick="cobrar(${t.id}, 'EFECTIVO')" class="w-full text-left px-4 py-2 text-xs font-medium text-gray-700 dark:text-gray-200 hover:bg-emerald-50 dark:hover:bg-gray-600 flex items-center gap-2">
+                                        <i class="fa-solid fa-money-bill text-emerald-500"></i> Efectivo
+                                    </button>
+                                    <button onclick="cobrar(${t.id}, 'TRANSFERENCIA')" class="w-full text-left px-4 py-2 text-xs font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-600 flex items-center gap-2">
+                                        <i class="fa-solid fa-right-left text-blue-500"></i> Transferencia
+                                    </button>
+                                    <button onclick="cobrar(${t.id}, 'FIADO')" class="w-full text-left px-4 py-2 text-xs font-medium text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-gray-600 flex items-center gap-2">
+                                        <i class="fa-solid fa-book text-amber-500"></i> Fiado
+                                    </button>
+                                    <button onclick="compartirWhatsApp(${t.id})" class="w-full text-left px-4 py-2 text-xs font-medium text-gray-700 dark:text-gray-200 hover:bg-emerald-50 dark:hover:bg-gray-600 flex items-center gap-2">
+                                        <i class="fa-brands fa-whatsapp text-emerald-600"></i> WhatsApp
+                                    </button>
+                                    <div class="border-t border-gray-100 dark:border-gray-600 my-1"></div>
+                                    <button onclick="cancelarTurno(${t.id})" class="w-full text-left px-4 py-2 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-gray-600 flex items-center gap-2">
+                                        <i class="fa-solid fa-ban"></i> Cancelar Turno
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -539,9 +581,9 @@
             servicios.forEach((s) => {
                 let isSelected = servicioSeleccionado && servicioSeleccionado.id === s.id;
                 contenedor.innerHTML += `
-                    <div onclick='seleccionarServicio(${JSON.stringify(s)})' class="cursor-pointer p-2.5 rounded-lg border transition flex justify-between items-center ${isSelected ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-950 font-semibold' : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'}">
+                    <div onclick='seleccionarServicio(${JSON.stringify(s)})' class="cursor-pointer p-2.5 rounded-lg border transition flex justify-between items-center ${isSelected ? 'border-red-600 bg-red-50 dark:bg-red-950 font-semibold' : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'}">
                         <span>${s.nombre}</span>
-                        <span class="text-indigo-600 dark:text-indigo-400">$${s.precio}</span>
+                        <span class="text-red-600 dark:text-red-400">$${s.precio}</span>
                     </div>
                 `;
             });
@@ -613,7 +655,7 @@
                     <div class="flex justify-between items-center bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm mb-2 transition-colors duration-200">
                         <span class="font-medium">${s.nombre}</span>
                         <div class="flex items-center space-x-3">
-                            <span class="text-indigo-600 dark:text-indigo-400 font-bold">$${s.precio}</span>
+                            <span class="text-red-600 dark:text-red-400 font-bold">$${s.precio}</span>
                             <button onclick="eliminarServicio(${s.id})" class="text-red-400 hover:text-red-600"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     </div>
@@ -684,7 +726,7 @@
                         </div>
                         
                         <details class="group my-2 bg-gray-50 dark:bg-gray-700 p-2.5 rounded-lg border border-gray-200 dark:border-gray-600">
-                            <summary class="cursor-pointer text-xs font-semibold text-indigo-600 dark:text-indigo-400 flex justify-between items-center">
+                            <summary class="cursor-pointer text-xs font-semibold text-red-600 dark:text-red-400 flex justify-between items-center">
                                 <span>Ver detalle de servicios (${f.detalle.length})</span>
                                 <i class="fa-solid fa-chevron-down group-open:rotate-180 transition-transform"></i>
                             </summary>
