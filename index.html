@@ -361,23 +361,35 @@
         }
 
         function toggleMenuTurno(id) {
-            // Cierra todos los otros menús abiertos primero
-            document.querySelectorAll('[id^="menu-turno-"]').forEach(menu => {
+            // Cierra todos los otros menús abiertos primero (tanto de turnos como de fiados)
+            document.querySelectorAll('[id^="menu-turno-"], [id^="menu-fiado-"]').forEach(menu => {
                 if (menu.id !== `menu-turno-${id}`) {
                     menu.classList.add('hidden');
                 }
             });
-            // Alterna el menú seleccionado
             const menu = document.getElementById(`menu-turno-${id}`);
             if (menu) {
                 menu.classList.toggle('hidden');
             }
         }
 
-        // Cerrar menú de turnos si se hace clic fuera
+        function toggleMenuFiado(id) {
+            // Cierra todos los otros menús abiertos primero
+            document.querySelectorAll('[id^="menu-turno-"], [id^="menu-fiado-"]').forEach(menu => {
+                if (menu.id !== `menu-fiado-${id}`) {
+                    menu.classList.add('hidden');
+                }
+            });
+            const menu = document.getElementById(`menu-fiado-${id}`);
+            if (menu) {
+                menu.classList.toggle('hidden');
+            }
+        }
+
+        // Cerrar menús flotantes si se hace clic fuera
         window.addEventListener('click', function(e) {
             if (!e.target.closest('.relative')) {
-                document.querySelectorAll('[id^="menu-turno-"]').forEach(menu => {
+                document.querySelectorAll('[id^="menu-turno-"], [id^="menu-fiado-"]').forEach(menu => {
                     menu.classList.add('hidden');
                 });
             }
@@ -735,10 +747,27 @@
                             </div>
                         </details>
 
-                        <div class="flex flex-wrap justify-end gap-2 mt-3 pt-2 border-t border-gray-100 dark:border-gray-700">
-                            <button onclick="enviarWhatsAppFiado(${f.id})" class="bg-emerald-700 hover:bg-emerald-800 text-white text-xs px-3 py-1.5 rounded font-medium"><i class="fa-brands fa-whatsapp mr-1"></i> Cobrar por WhatsApp</button>
-                            <button onclick="pagoParcial(${f.id})" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded font-medium">Abonar Parcial</button>
-                            <button onclick="saldarFiado(${f.id})" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3 py-1.5 rounded font-semibold">Saldar Total</button>
+                        <div class="flex justify-between items-center mt-3 pt-2 border-t border-gray-100 dark:border-gray-700">
+                            <span class="text-xs text-gray-400 italic">Acciones de cuenta</span>
+                            
+                            <!-- BOTÓN DE TRES PUNTOS Y MENÚ DESPLEGABLE PARA FIADOS -->
+                            <div class="relative">
+                                <button onclick="toggleMenuFiado(${f.id})" class="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 px-3 py-1.5 rounded-lg text-sm transition">
+                                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                                </button>
+                                
+                                <div id="menu-fiado-${f.id}" class="hidden absolute right-0 bottom-full mb-2 w-52 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl shadow-xl z-20 overflow-hidden py-1">
+                                    <button onclick="enviarWhatsAppFiado(${f.id})" class="w-full text-left px-4 py-2 text-xs font-medium text-gray-700 dark:text-gray-200 hover:bg-emerald-50 dark:hover:bg-gray-600 flex items-center gap-2">
+                                        <i class="fa-brands fa-whatsapp text-emerald-600 text-sm"></i> Cobrar por WhatsApp
+                                    </button>
+                                    <button onclick="pagoParcial(${f.id})" class="w-full text-left px-4 py-2 text-xs font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-600 flex items-center gap-2">
+                                        <i class="fa-solid fa-wallet text-blue-500 text-sm"></i> Abonar Parcial
+                                    </button>
+                                    <button onclick="saldarFiado(${f.id})" class="w-full text-left px-4 py-2 text-xs font-medium text-gray-700 dark:text-gray-200 hover:bg-emerald-50 dark:hover:bg-gray-600 flex items-center gap-2">
+                                        <i class="fa-solid fa-circle-check text-emerald-500 text-sm"></i> Saldar Total
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 `;
