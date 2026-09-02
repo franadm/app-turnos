@@ -75,6 +75,18 @@
             <button onclick="cambiarTab('servicios'); toggleMenuAjustes();" class="w-full text-left text-sm py-2 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition flex items-center">
                 <i class="fa-solid fa-list-check mr-2 text-indigo-500"></i> Gestionar Servicios
             </button>
+
+            <!-- SECCIÓN DE BACKUPS -->
+            <div class="pt-2 border-t border-gray-100 dark:border-gray-700 space-y-2">
+                <span class="text-xs font-bold text-gray-400 uppercase tracking-wide block">Copias de Seguridad</span>
+                <button onclick="exportarBackup()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs py-2 px-3 rounded-lg font-medium transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-download"></i> Exportar Backup (JSON)
+                </button>
+                <button onclick="document.getElementById('input-importar-backup').click()" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs py-2 px-3 rounded-lg font-medium transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-upload"></i> Importar Backup (JSON)
+                </button>
+                <input type="file" id="input-importar-backup" accept=".json" onchange="importarBackup(event)" class="hidden">
+            </div>
         </div>
     </div>
 
@@ -701,6 +713,53 @@
                 renderFiados();
                 alert('¡Cuenta corriente saldada y sumada a la caja con éxito!');
             }
+        }
+
+        // FUNCIONES DE BACKUP (EXPORTAR E IMPORTAR)
+        function exportarBackup() {
+            const dataBackup = {
+                servicios: JSON.parse(localStorage.getItem('servicios')) || [],
+                turnos: JSON.parse(localStorage.getItem('turnos')) || [],
+                fiados: JSON.parse(localStorage.getItem('fiados')) || [],
+                cajaRegistros: JSON.parse(localStorage.getItem('cajaRegistros')) || [],
+                theme: localStorage.getItem('theme') || 'light'
+            };
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataBackup, null, 2));
+            const fechaStr = new Date().toISOString().split('T')[0];
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `backup_alexstyle_${fechaStr}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            toggleMenuAjustes();
+        }
+
+        function importarBackup(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const contenido = JSON.parse(e.target.result);
+
+                    if (confirm('¿Estás seguro de restaurar este backup? Se sobrescribirán todos los datos actuales de turnos, servicios, caja y fiados.')) {
+                        if (contenido.servicios) localStorage.setItem('servicios', JSON.stringify(contenido.servicios));
+                        if (contenido.turnos) localStorage.setItem('turnos', JSON.stringify(contenido.turnos));
+                        if (contenido.fiados) localStorage.setItem('fiados', JSON.stringify(contenido.fiados));
+                        if (contenido.cajaRegistros) localStorage.setItem('cajaRegistros', JSON.stringify(contenido.cajaRegistros));
+                        if (contenido.theme) localStorage.setItem('theme', contenido.theme);
+
+                        alert('¡Backup importado con éxito! La página se recargará para aplicar los cambios.');
+                        location.reload();
+                    }
+                } catch (error) {
+                    alert('Error al leer el archivo. Asegúrate de que sea un archivo JSON válido de Alexstyle.');
+                }
+            };
+            reader.readAsText(file);
         }
 
         renderTurnosFecha();
