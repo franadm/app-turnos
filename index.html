@@ -223,7 +223,8 @@
                 </div>
                 <div class="mb-4">
                     <label class="block text-sm font-medium mb-1">Precio ($)</label>
-                    <input type="number" id="serv-precio" class="w-full border border-gray-300 dark:border-gray-700 bg-transparent rounded-lg p-2" required placeholder="15000">
+                    <!-- Campo con formateo automático de puntos de miles -->
+                    <input type="text" id="serv-precio" oninput="formatearInputPrecio(this)" class="w-full border border-gray-300 dark:border-gray-700 bg-transparent rounded-lg p-2" required placeholder="15.000">
                 </div>
                 <button type="submit" class="w-full bg-red-600 text-white py-2 rounded-lg font-semibold">Guardar Servicio</button>
             </form>
@@ -232,6 +233,22 @@
 
     <!-- Script de Lógica -->
     <script>
+        // Función auxiliar para formatear números con puntos de miles (ej: 15000 -> 15.000)
+        function formatearMoneda(valor) {
+            return new Intl.NumberFormat('es-AR').format(valor);
+        }
+
+        // Formateo en tiempo real mientras el usuario escribe en el input de precio
+        function formatearInputPrecio(input) {
+            let valorLimpio = input.value.replace(/\D/g, ''); // Solo números
+            if (valorLimpio === '') {
+                input.value = '';
+                return;
+            }
+            let numero = parseInt(valorLimpio, 10);
+            input.value = formatearMoneda(numero);
+        }
+
         // Inicializar Tema Nocturno / Diurno
         const temaGuardado = localStorage.getItem('theme') || 'light';
         if (temaGuardado === 'dark') {
@@ -361,7 +378,6 @@
         }
 
         function toggleMenuTurno(id) {
-            // Cierra todos los otros menús abiertos primero (tanto de turnos como de fiados)
             document.querySelectorAll('[id^="menu-turno-"], [id^="menu-fiado-"]').forEach(menu => {
                 if (menu.id !== `menu-turno-${id}`) {
                     menu.classList.add('hidden');
@@ -374,7 +390,6 @@
         }
 
         function toggleMenuFiado(id) {
-            // Cierra todos los otros menús abiertos primero
             document.querySelectorAll('[id^="menu-turno-"], [id^="menu-fiado-"]').forEach(menu => {
                 if (menu.id !== `menu-fiado-${id}`) {
                     menu.classList.add('hidden');
@@ -386,7 +401,6 @@
             }
         }
 
-        // Cerrar menús flotantes si se hace clic fuera
         window.addEventListener('click', function(e) {
             if (!e.target.closest('.relative')) {
                 document.querySelectorAll('[id^="menu-turno-"], [id^="menu-fiado-"]').forEach(menu => {
@@ -418,7 +432,7 @@
                 let itemsHtml = t.items.map(i => `
                     <div class="flex justify-between text-sm py-1 border-b border-gray-100 dark:border-gray-700">
                         <span>• ${i.nombre}</span>
-                        <span class="font-medium">$${i.precio}</span>
+                        <span class="font-medium">$${formatearMoneda(i.precio)}</span>
                     </div>
                 `).join('');
 
@@ -435,7 +449,7 @@
                         <div class="my-3">${itemsHtml}</div>
                         
                         <div class="flex justify-between items-center mt-3 pt-2 border-t border-gray-200 dark:border-gray-700">
-                            <span class="font-bold text-gray-700 dark:text-gray-300">Total: $${t.total}</span>
+                            <span class="font-bold text-gray-700 dark:text-gray-300">Total: $${formatearMoneda(t.total)}</span>
                             
                             <!-- BOTÓN DE TRES PUNTOS Y MENÚ DESPLEGABLE -->
                             <div class="relative">
@@ -484,9 +498,9 @@
             let turno = turnos.find(t => t.id === id);
             if(!turno) return;
 
-            let mensajeConfirmacion = `¿Confirmas el cobro de $${turno.total} a ${turno.nombre} mediante ${metodo}?`;
+            let mensajeConfirmacion = `¿Confirmas el cobro de $${formatearMoneda(turno.total)} a ${turno.nombre} mediante ${metodo}?`;
             if (metodo === 'FIADO') {
-                mensajeConfirmacion = `¿Confirmas registrar como FIADO el monto de $${turno.total} para ${turno.nombre}?`;
+                mensajeConfirmacion = `¿Confirmas registrar como FIADO el monto de $${formatearMoneda(turno.total)} para ${turno.nombre}?`;
             }
 
             if (!confirm(mensajeConfirmacion)) return;
@@ -519,7 +533,7 @@
                     concepto: `Turno: ${turno.nombre}`
                 });
                 localStorage.setItem('cajaRegistros', JSON.stringify(cajaRegistros));
-                alert(`¡Cobro de $${turno.total} realizado con éxito vía ${metodo}!`);
+                alert(`¡Cobro de $${formatearMoneda(turno.total)} realizado con éxito vía ${metodo}!`);
             }
 
             localStorage.setItem('turnos', JSON.stringify(turnos));
@@ -555,9 +569,9 @@
                 }
             });
 
-            document.getElementById('caja-hoy').innerText = `$${totalHoy}`;
-            document.getElementById('caja-semana').innerText = `$${totalSemana}`;
-            document.getElementById('caja-mes').innerText = `$${totalMes}`;
+            document.getElementById('caja-hoy').innerText = `$${formatearMoneda(totalHoy)}`;
+            document.getElementById('caja-semana').innerText = `$${formatearMoneda(totalSemana)}`;
+            document.getElementById('caja-mes').innerText = `$${formatearMoneda(totalMes)}`;
         }
 
         function compartirWhatsApp(id) {
@@ -567,8 +581,8 @@
             let [anio, mes, dia] = turno.fecha.split('-');
             let fechaFormateada = `${dia}/${mes}/${anio}`;
 
-            let detalleTexto = turno.items.map(i => `- ${i.nombre}: $${i.precio}`).join('%0A');
-            let mensaje = `Hola *${turno.nombre}*! Te recordamos los datos de tu turno en *ALEXSTYLE*:%0A📅 *Fecha:* ${fechaFormateada}%0A⏰ *Hora:* ${turno.hora || 'Orden de llegada'}%0A%0A*Detalle:*%0A${detalleTexto}%0A*Total a Pagar: $${turno.total}*%0A¡Te esperamos!`;
+            let detalleTexto = turno.items.map(i => `- ${i.nombre}: $${formatearMoneda(i.precio)}`).join('%0A');
+            let mensaje = `Hola *${turno.nombre}*! Te recordamos los datos de tu turno en *ALEXSTYLE*:%0A📅 *Fecha:* ${fechaFormateada}%0A⏰ *Hora:* ${turno.hora || 'Orden de llegada'}%0A%0A*Detalle:*%0A${detalleTexto}%0A*Total a Pagar: $${formatearMoneda(turno.total)}*%0A¡Te esperamos!`;
             
             window.open(`https://api.whatsapp.com/send?text=${mensaje}`, '_blank');
         }
@@ -595,7 +609,7 @@
                 contenedor.innerHTML += `
                     <div onclick='seleccionarServicio(${JSON.stringify(s)})' class="cursor-pointer p-2.5 rounded-lg border transition flex justify-between items-center ${isSelected ? 'border-red-600 bg-red-50 dark:bg-red-950 font-semibold' : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'}">
                         <span>${s.nombre}</span>
-                        <span class="text-red-600 dark:text-red-400">$${s.precio}</span>
+                        <span class="text-red-600 dark:text-red-400">$${formatearMoneda(s.precio)}</span>
                     </div>
                 `;
             });
@@ -603,7 +617,7 @@
 
         function seleccionarServicio(servicio) {
             servicioSeleccionado = servicio;
-            document.getElementById('modal-total-estimado').innerText = `$${servicio.precio}`;
+            document.getElementById('modal-total-estimado').innerText = `$${formatearMoneda(servicio.precio)}`;
             renderSelectorServicios();
         }
 
@@ -667,7 +681,7 @@
                     <div class="flex justify-between items-center bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm mb-2 transition-colors duration-200">
                         <span class="font-medium">${s.nombre}</span>
                         <div class="flex items-center space-x-3">
-                            <span class="text-red-600 dark:text-red-400 font-bold">$${s.precio}</span>
+                            <span class="text-red-600 dark:text-red-400 font-bold">$${formatearMoneda(s.precio)}</span>
                             <button onclick="eliminarServicio(${s.id})" class="text-red-400 hover:text-red-600"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     </div>
@@ -682,14 +696,25 @@
             });
         }
 
-        function abrirModalServicio() { document.getElementById('modal-servicio').classList.remove('hidden'); }
+        function abrirModalServicio() { 
+            document.getElementById('serv-precio').value = '';
+            document.getElementById('modal-servicio').classList.remove('hidden'); 
+        }
         function cerrarModalServicio() { document.getElementById('modal-servicio').classList.add('hidden'); }
 
         function guardarNuevoServicio(e) {
             e.preventDefault();
             let categoria = document.getElementById('serv-cat').value;
             let nombre = document.getElementById('serv-nombre').value.toUpperCase();
-            let precio = parseFloat(document.getElementById('serv-precio').value);
+            
+            // Limpiar puntos para guardarlo como número puro en la base de datos
+            let precioStr = document.getElementById('serv-precio').value.replace(/\./g, '');
+            let precio = parseFloat(precioStr);
+
+            if(isNaN(precio)) {
+                alert('Ingresa un precio válido.');
+                return;
+            }
 
             servicios.push({ id: Date.now(), categoria, nombre, precio });
             localStorage.setItem('servicios', JSON.stringify(servicios));
@@ -719,13 +744,14 @@
             fiadosFiltrados.forEach(f => {
                 let detalleHtml = f.detalle.map(d => {
                     let itemsNombres = d.items.map(i => i.nombre).join(', ');
+                    let precioFormateado = d.total < 0 ? `-$${formatearMoneda(Math.abs(d.total))}` : `$${formatearMoneda(d.total)}`;
                     return `
                         <div class="flex justify-between items-center text-xs py-2 border-b border-gray-100 dark:border-gray-700">
                             <div>
                                 <span class="font-semibold text-gray-700 dark:text-gray-300">${d.fecha} (${d.hora})</span>
                                 <p class="text-gray-500 dark:text-gray-400">${itemsNombres}</p>
                             </div>
-                            <span class="font-bold text-gray-800 dark:text-gray-100">$${d.total}</span>
+                            <span class="font-bold text-gray-800 dark:text-gray-100">${precioFormateado}</span>
                         </div>
                     `;
                 }).join('');
@@ -734,7 +760,7 @@
                     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 border-l-4 border-amber-500 transition-colors duration-200">
                         <div class="flex justify-between items-center mb-2">
                             <span class="font-bold text-gray-800 dark:text-gray-100 text-lg"><i class="fa-solid fa-user-tag mr-2 text-amber-500"></i>${f.nombre}</span>
-                            <span class="text-lg font-bold text-red-600 dark:text-red-400">Deuda: $${f.total}</span>
+                            <span class="text-lg font-bold text-red-600 dark:text-red-400">Deuda: $${formatearMoneda(f.total)}</span>
                         </div>
                         
                         <details class="group my-2 bg-gray-50 dark:bg-gray-700 p-2.5 rounded-lg border border-gray-200 dark:border-gray-600">
@@ -778,10 +804,10 @@
             let cliente = fiados.find(f => f.id === id);
             if(!cliente) return;
 
-            let montoStr = prompt(`Deuda actual de ${cliente.nombre}: $${cliente.total}\n\nIngresa el monto que el cliente está abonando ahora:`);
+            let montoStr = prompt(`Deuda actual de ${cliente.nombre}: $${formatearMoneda(cliente.total)}\n\nIngresa el monto que el cliente está abonando ahora:`);
             if(!montoStr) return;
 
-            let montoAbonado = parseFloat(montoStr);
+            let montoAbonado = parseFloat(montoStr.replace(/\./g, ''));
             if(isNaN(montoAbonado) || montoAbonado <= 0) {
                 alert('Por favor ingresa un monto válido.');
                 return;
@@ -814,14 +840,14 @@
 
             localStorage.setItem('fiados', JSON.stringify(fiados));
             renderFiados();
-            alert(`¡Pago parcial de $${montoAbonado} registrado con éxito! Nuevo saldo pendiente: $${cliente.total}`);
+            alert(`¡Pago parcial de $${formatearMoneda(montoAbonado)} registrado con éxito! Nuevo saldo pendiente: $${formatearMoneda(cliente.total)}`);
         }
 
         function enviarWhatsAppFiado(id) {
             let cliente = fiados.find(f => f.id === id);
             if(!cliente) return;
 
-            let mensaje = `Hola *${cliente.nombre}*! Te escribimos de *ALEXSTYLE* para recordarte que tienes un saldo pendiente en tu cuenta corriente por un total de *\$${cliente.total}*. ¡Muchas gracias!`;
+            let mensaje = `Hola *${cliente.nombre}*! Te escribimos de *ALEXSTYLE* para recordarte que tienes un saldo pendiente en tu cuenta corriente por un total de *\$${formatearMoneda(cliente.total)}*. ¡Muchas gracias!`;
             window.open(`https://api.whatsapp.com/send?text=${mensaje}`, '_blank');
         }
 
@@ -829,7 +855,7 @@
             let cliente = fiados.find(f => f.id === id);
             if(!cliente) return;
 
-            if(confirm(`¿Estás seguro de que ${cliente.nombre} ha saldado su cuenta completa de $${cliente.total}?`)) {
+            if(confirm(`¿Estás seguro de que ${cliente.nombre} ha saldado su cuenta completa de $${formatearMoneda(cliente.total)}?`)) {
                 let montoRestante = cliente.total;
 
                 cajaRegistros.push({
